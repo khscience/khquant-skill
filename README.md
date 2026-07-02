@@ -3,7 +3,7 @@
 > 看海量化回测平台 (KhQuant) 的 AI Skill 插件 — 用自然语言驱动 `kh` 命令完成数据管理、策略开发、回测执行和结果分析。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](#版本)
+[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](#版本)
 [![KhQuant](https://img.shields.io/badge/KhQuant-v3.x-green.svg)](https://khsci.com/khQuant/)
 
 ---
@@ -29,6 +29,15 @@
 - **故障排查** — 自动识别常见错误并给出修复方案
 
 内置三色灯安全分级：查询类自动执行，修改类需用户确认，危险类必须明确授权（如 `kh result clean`、`kh data repair`）。
+
+## 更新日志
+
+### v1.0.1 (2026-07-02)
+
+- 同步 KhQuant v3.3.6+ 的 CLI 能力说明，补齐 `performance_preset` 三档性能预设、`kh run --memory-profile` 和 `performance_framework_history_preload_days`（默认 `300`）等性能设置。
+- 补充 `kh tool parquet-cache` 缓存包命令，覆盖统计、检查、构建、只读使用和清理流程。
+- 补充 `kh bridge serve/status` 与 `kh data download/sync --source http` 的桥接数据源用法。
+- 调整 Skill 的安全分级与意图路由，让查询类、修改类和危险类命令边界更清晰。
 
 ## 前提条件
 
@@ -161,6 +170,7 @@ rmdir /S /Q "%USERPROFILE%\.claude\skills\khquant"
 
 ## 版本
 
+- **v1.0.1** — 同步 KhQuant v3.3.6+ CLI 指令，补充性能设置、Parquet 缓存包和桥接数据源说明
 - **v1.0.0** — 适配 KhQuant CLI v3.x
 
 ## 许可

@@ -1,7 +1,7 @@
 ---
 name: khquant
 description: 当用户提到"回测"、"看海量化"、"kh命令"、"跑策略"、"下载股票数据"、"查看回测结果"、"双均线"、"MACD"、"RSI策略"、"KDJ"、"布林带"、"miniQMT"、"BaoStock"、"Tushare"、"沪深300"、"A股"、".kh配置文件"、"策略开发"、"K线"、"DuckDB"、"量化交易"、"khHandlebar"、"khGet"、"khPrice"、"khIndex"、"khHistory"、"khDuckDB"、"khMA"、"generate_signal"、"khAddExtraFields"、"MyTT"、"技术指标"、"交易信号"时使用。本 skill 是看海量化回测平台 CLI (kh) 的自然语言入口，支持首次配置、数据管理、策略开发、回测执行、结果分析和故障排查。
-version: 1.0.0
+version: 1.0.1
 allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion]
 ---
 
