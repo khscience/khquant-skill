@@ -89,6 +89,84 @@ kh run config.kh --stocks 000001.SZ,600000.SH
 kh run config.kh --period 5m
 ```
 
+## 回测性能与内存模式（v3.3.6+）
+
+khQuant 现在有两层性能设置：
+
+1. **全局性能预设**：写入 `%USERPROFILE%\.khquant\settings.json`，以后所有回测默认使用。
+2. **单次回测覆盖**：只影响当前这条 `kh run` 命令，不修改全局配置。
+
+### 全局性能预设
+
+优先用 `performance_preset`，不要一上来就改底层细节：
+
+```bash
+# 查看当前性能配置
+kh config show
+
+# 智能模式（推荐，默认）：小数据全量，大数据自动分段
+kh config set performance_preset balanced
+
+# 全量加载：内存充足、小数据最快；超大数据可能内存不足
+kh config set performance_preset performance
+
+# 省内存：强制分段加载，适合大股票池、小周期、长区间
+kh config set performance_preset low_memory
+```
+
+| 预设 | 数据加载方式 | 适合 |
+|------|--------------|------|
+| `balanced` | 自动判断全量或分段 | 默认推荐 |
+| `performance` | 尽量全量加载 | 小数据、内存充足、追求速度 |
+| `low_memory` | 强制分段加载 | 大股票池、分钟线、长区间、内存有限 |
+
+注意：三档只影响速度和内存，不应改变回测结果。改引擎或数据加载后，需要用回归基准验证三档结果一致。
+
+### 单次回测覆盖内存模式
+
+如果只想临时测试某次回测，不改全局配置：
+
+```bash
+# 自动判断
+kh run config.kh --memory-profile auto
+
+# 强制全量加载
+kh run config.kh --memory-profile standard
+
+# 强制低内存分段
+kh run config.kh --memory-profile low
+
+# 极低内存分段
+kh run config.kh --memory-profile ultra_low
+```
+
+也可以临时禁用“内存不足时自动动态分段”：
+
+```bash
+kh run config.kh --memory-profile standard --no-auto-dynamic-load
+```
+
+### 常用详细参数
+
+一般不需要手动改这些参数；只有在性能排查或压测时才调整：
+
+```bash
+kh config set performance_memory_profile auto
+kh config set performance_memory_auto_dynamic_load true
+kh config set performance_memory_low_chunk_size 20
+kh config set performance_memory_ultra_low_chunk_size 20
+kh config set performance_framework_history_preload_days 300
+kh config set performance_duckdb_parallel_read_workers 4
+kh config set performance_duckdb_load_max_connections 800
+kh config set performance_duckdb_max_connections 800
+```
+
+经验规则：
+- 大股票池、小周期、长区间回测优先用 `low_memory`，旧版本容易在这种场景内存爆棚。
+- `performance_framework_history_preload_days` 默认 `300`，用于给 `khHistory` 内存快路预热回测开始日前的历史 K 线；可在 GUI「回测性能 → 详细设置」或 CLI 中设为 `0~2000`。
+- `chunk_size` 不要盲目调小。实测低于约 20 个交易日会因为换段次数暴增，反而更慢、更容易出现内存抖动。
+- 连接池默认 `800` 是压力测试后的折中值；调大可能更慢且更吃内存。
+
 ## 输出模式
 
 | 参数 | 效果 |

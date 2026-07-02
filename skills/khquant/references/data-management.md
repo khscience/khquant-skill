@@ -2,18 +2,18 @@
 
 ## 数据源能力矩阵
 
-| 特性 | xtdata (miniQMT) | BaoStock | Tushare |
-|------|-------------------|----------|---------|
-| 费用 | 券商开户免费 | 完全免费 | 积分制 |
-| 日线 1d | OK | OK | OK |
-| 1 分钟线 1m | OK | - | OK |
-| 5 分钟线 5m | OK | OK | OK |
-| Tick 数据 | OK | - | - |
-| 前复权 front | OK | OK | OK |
-| 后复权 back | OK | OK | OK |
-| 前比例复权 front_ratio | OK | - | - |
-| 后比例复权 back_ratio | OK | - | - |
-| 安装要求 | QMT 客户端运行 | `pip install baostock` | Token + `pip install tushare` |
+| 特性 | xtdata (miniQMT) | BaoStock | Tushare | http (bridge) |
+|------|-------------------|----------|---------|---------------|
+| 费用 | 券商开户免费 | 完全免费 | 积分制 | 取决于桥接端 |
+| 日线 1d | OK | OK | OK | OK |
+| 1 分钟线 1m | OK | - | OK | OK |
+| 5 分钟线 5m | OK | OK | OK | OK |
+| Tick 数据 | OK | - | - | 取决于桥接端 |
+| 前复权 front | OK | OK | OK | 取决于桥接端 |
+| 后复权 back | OK | OK | OK | 取决于桥接端 |
+| 前比例复权 front_ratio | OK | - | - | 取决于桥接端 |
+| 后比例复权 back_ratio | OK | - | - | 取决于桥接端 |
+| 安装要求 | QMT 客户端运行 | `pip install baostock` | Token + `pip install tushare` | 先运行 `kh bridge serve` 或配置远端桥接服务 |
 
 ## 下载数据
 
@@ -46,7 +46,7 @@ kh data download --source baostock --file stocks.csv
 
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
-| `--source` | 无（必需）| `xtdata` / `baostock` / `tushare` |
+| `--source` | 无（必需）| `xtdata` / `baostock` / `tushare` / `http` |
 | `--stocks` | | 股票代码，逗号分隔 |
 | `--pool` | | 预设池名称（见 pools-and-codes.md）|
 | `--file` | | 股票列表文件路径 |
@@ -71,6 +71,10 @@ kh data download --source xtdata --stocks 000001.SZ --period tick --start 202501
 
 # 用 Tushare 下载前复权+后复权
 kh data download --source tushare --stocks 000001.SZ --adj front,back
+
+# 通过桥接服务下载（先确认桥接服务状态）
+kh bridge status
+kh data download --source http --stocks 000001.SZ --period 1d
 ```
 
 ### 自动基准下载
@@ -122,6 +126,9 @@ kh data scan --period 1d --fix --source baostock
 ```bash
 # 立即同步
 kh data sync --period 1d
+
+# 经桥接服务同步
+kh data sync --source http --period 1d
 
 # 定时同步（工作日 15:30 执行，需要 schedule 库）
 kh data sync --schedule 15:30
