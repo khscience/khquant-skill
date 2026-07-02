@@ -30,6 +30,15 @@
 
 内置三色灯安全分级：查询类自动执行，修改类需用户确认，危险类必须明确授权（如 `kh result clean`、`kh data repair`）。
 
+## 适配版本
+
+- **当前 Skill 版本**：v1.0.1
+- **主要匹配软件版本**：KhQuant v3.3.6.1
+- **基础兼容范围**：KhQuant v3.x
+- **需要 v3.3.6 或更高版本的能力**：性能预设 `performance_preset`、`kh run --memory-profile`、`performance_framework_history_preload_days`、`kh tool parquet-cache`、`kh bridge` 以及 `--source http` 桥接数据源。
+
+如果用户的软件版本低于 v3.3.6，本 Skill 仍可用于基础配置、数据管理、策略开发和普通回测，但不要假设上述新增 CLI 参数一定存在，应先运行 `kh version` 和对应命令的 `--help` 确认。
+
 ## 更新日志
 
 ### v1.0.1 (2026-07-02)
@@ -38,6 +47,7 @@
 - 补充 `kh tool parquet-cache` 缓存包命令，覆盖统计、检查、构建、只读使用和清理流程。
 - 补充 `kh bridge serve/status` 与 `kh data download/sync --source http` 的桥接数据源用法。
 - 调整 Skill 的安全分级与意图路由，让查询类、修改类和危险类命令边界更清晰。
+- 明确 Skill v1.0.1 主要匹配 KhQuant v3.3.6.1；基础功能兼容 KhQuant v3.x，新增性能与桥接命令要求 v3.3.6+。
 
 ## 前提条件
 
@@ -170,7 +180,7 @@ rmdir /S /Q "%USERPROFILE%\.claude\skills\khquant"
 
 ## 版本
 
-- **v1.0.1** — 同步 KhQuant v3.3.6+ CLI 指令，补充性能设置、Parquet 缓存包和桥接数据源说明
+- **v1.0.1** — 主要匹配 KhQuant v3.3.6.1；同步 KhQuant v3.3.6+ CLI 指令，补充性能设置、Parquet 缓存包和桥接数据源说明
 - **v1.0.0** — 适配 KhQuant CLI v3.x
 
 ## 许可
