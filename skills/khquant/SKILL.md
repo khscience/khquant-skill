@@ -1,8 +1,6 @@
 ---
 name: khquant
-description: 当用户提到"回测"、"看海量化"、"kh命令"、"跑策略"、"下载股票数据"、"查看回测结果"、"双均线"、"MACD"、"RSI策略"、"KDJ"、"布林带"、"miniQMT"、"BaoStock"、"Tushare"、"沪深300"、"A股"、".kh配置文件"、"策略开发"、"K线"、"DuckDB"、"量化交易"、"khHandlebar"、"khGet"、"khPrice"、"khIndex"、"khHistory"、"khDuckDB"、"khMA"、"generate_signal"、"khAddExtraFields"、"MyTT"、"技术指标"、"交易信号"时使用。本 skill 是看海量化回测平台 CLI (kh) 的自然语言入口，支持首次配置、数据管理、策略开发、回测执行、结果分析和故障排查。
-version: 1.0.1
-allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion]
+description: 当用户提到"回测"、"看海量化"、"kh命令"、"kh web"、"网页回测"、"跑策略"、"下载股票数据"、"查看回测结果"、"双均线"、"MACD"、"RSI策略"、"KDJ"、"布林带"、"miniQMT"、"BaoStock"、"Tushare"、"沪深300"、"A股"、".kh配置文件"、"策略开发"、"K线"、"DuckDB"、"量化交易"、"khHandlebar"、"khGet"、"khPrice"、"khIndex"、"khHistory"、"khDuckDB"、"khMA"、"generate_signal"、"khAddExtraFields"、"MyTT"、"技术指标"、"交易信号"时使用。本 skill 是看海量化回测平台 CLI (kh) 的自然语言入口，支持首次配置、数据管理、策略开发、桌面与网页回测、结果分析和故障排查。
 ---
 
 # 看海量化回测平台 CLI 助手
@@ -18,7 +16,7 @@ allowed-tools: [Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion]
 | 级别 | 命令类型 | 行为 |
 |------|---------|------|
 | **自动执行** | 查询类：`kh doctor`、`kh data stats/list/info`、`kh result list/show`、`kh strategy list/info/validate`、`kh tool trade-day/pool`、`kh tool parquet-cache stats/list/check`、`kh bridge status`、`kh config show`、`kh version` | 直接通过 Bash 运行，展示结果 |
-| **确认后执行** | 修改/生成类：`kh data download/scan --fix/sync/export`、`kh run`、`kh result report/compare`、`kh strategy create`、`kh config set/reset`、`kh tool parquet-cache build/use-readonly`、`kh bridge serve` | 先展示将要执行的命令，用 AskUserQuestion 确认后再执行 |
+| **确认后执行** | 修改/生成类：`kh data download/scan --fix/sync/export`、`kh run`、`kh web`、`kh result report/compare`、`kh strategy create`、`kh config set/reset`、`kh tool parquet-cache build/use-readonly`、`kh bridge serve` | 先展示将要执行的命令，用 AskUserQuestion 确认后再执行 |
 | **必须确认** | 危险类：`kh result clean`、`kh tool parquet-cache clean`、`kh data repair`、`kh init`（会覆盖现有配置） | 明确告知风险，必须确认 |
 
 ### 命令回显
@@ -46,6 +44,7 @@ Tushare Token 等凭据不由 skill 直接处理。需要配置时引导用户�
 | "写策略"、"创建策略"、"回调函数"、"khHandlebar"、"khGet"、"khPrice"、"khIndex"、"khHistory"、"khDuckDB"、"khMA"、"generate_signal"、"khAddExtraFields"、"MyTT"、"技术指标"、"MACD"、"RSI"、"KDJ"、"布林带"、".kh配置" | 策略开发 | `references/strategy-development.md` |
 | "跑回测"、"运行策略"、".kh文件"、"回测参数"、"性能设置"、"性能模式"、"内存模式"、"省内存"、"全量加载"、"balanced"、"low_memory"、"performance_preset"、"memory-profile" | 回测执行 | `references/backtesting.md` |
 | "回测结果"、"收益率"、"报告"、"对比"、"绩效" | 结果分析 | `references/results-analysis.md` |
+| "kh web"、"网页回测"、"网页工作台"、"Web界面"、"实时日志"、"本次回测结果" | 网页回测 | `references/web-backtesting.md` |
 | "报错"、"ERR"、"失败"、"连不上"、"找不到" | 故障排查 | `references/troubleshooting.md` |
 | "什么命令"、"参数"、"用法"、"帮助"、"CLI指令"、"config set"、"parquet-cache"、"桥接服务"、"bridge" | 命令查询 | `references/command-reference.md` |
 | "股票代码"、"市场后缀"、"沪深300池" | 代码规范 | `references/pools-and-codes.md` |
@@ -59,9 +58,7 @@ Tushare Token 等凭据不由 skill 直接处理。需要配置时引导用户�
 ## Phase 2 — 前置检查
 
 首次交互时运行 `kh version`，检查版本号：
-- 本 skill **v1.0.1 主要匹配 KhQuant v3.3.6.1**；基础功能兼容 **v3.x**
-- `performance_preset`、`--memory-profile`、`performance_framework_history_preload_days`、`kh tool parquet-cache`、`kh bridge`、`--source http` 等新增能力需要 **v3.3.6 或更高版本**
-- 如果版本为 **v3.x 但低于 v3.3.6**，可以继续处理基础配置、数据管理、策略开发和普通回测；涉及上述新增命令前先运行 `kh <command> --help` 或提示用户升级
+- 如果版本为 **v3.x**（当前正式版为 v3.4.0），正常继续；涉及功能边界时以实际输出和当前源码为准
 - 如果版本为 **v2.x**，**停止执行**并提示用户：
   > 检测到你使用的是看海量化 v2 版本，本 skill 仅支持 v3。请前往官网升级：https://khsci.com/khQuant/
 - 如果 `kh` 命令不存在，提示用户先安装：
@@ -111,6 +108,57 @@ pip install numpy pandas duckdb matplotlib Pillow holidays requests psutil
 3. 运行回测：`kh run <配置>.kh --report`
 4. 查看/对比结果：`kh result show` / `kh result compare`
 
+### 网页回测入口
+
+网页工作台的完整使用、界面结构、运行状态、实时日志、结果卡和排错流程见 `references/web-backtesting.md`。
+
+- `kh web`：启动网页工作台，打开最近使用的项目。
+- `kh web <配置.kh>`：启动前导入指定配置，网页打开后直接载入该项目。
+- 桌面端主工具栏右侧的地球图标会执行同一套启动逻辑：当前已加载 `.kh` 时自动带入配置；没有配置时直接打开网页工作台。
+- 网页服务默认使用 `127.0.0.1:8766`；`8765` 保留给桌面端内置编辑器通信服务，不要混用。
+- 桌面端以独立进程启动网页服务，关闭 GUI 不会停止网页回测；再次点击图标会复用已有服务，不会重复占用端口。
+- 网页端本机导入可只选择一个 `.kh` 文件；系统会读取其中的 `strategy_file`，自动带入入口 `.py`、其递归引用的本地 Python 依赖以及配置引用的股票池 CSV。
+- 本机浏览器可使用系统文件选择框或手动输入完整路径。非本机访问不能打开服务器的本机文件选择框，应上传完整项目或填写服务器上的配置路径。
+- 网页回测仍调用既有 `kh` CLI 与回测核心，不另建一套回测引擎；数据库固定使用 DuckDB。
+- 网页端当前以回测为核心：数据管理暂不提供；设置页主要展示桌面端配置，关键性能参数和 DuckDB 路径仍以桌面端设置为准。
+
+### V3.4.0 平台与分发边界
+
+- Windows V3 桌面版包含 GUI、CLI、完整 Web 工作台和 miniQMT/DuckDB 能力；macOS Apple Silicon V3 桌面版包含 GUI、CLI、完整 Web 工作台和 DuckDB，但不包含 miniQMT/xtquant。Windows/macOS 的 V3 桌面安装包只在官网 V3 专项页向 VIP 用户提供。
+- V2.1 是官网公开下载版，不得用 V3 桌面安装包替换其公开入口。Windows/macOS V3 安装包只放风筑下载服务器，不上传 GitHub Release，也不得在公开页面暴露直链。
+- CSkhQuant 的 V3.4.0 公开源码、Linux wheel/sdist、Docker 和 Linux 校验文件可以发布到 GitHub；这不等于公开 Windows/macOS V3 桌面安装包。
+- Linux 正式发行物包含 CLI 与完整 Web 工作台，支持 Ubuntu 22.04 / 24.04、Python 3.10—3.12。Linux wheel 和 Docker 都必须注册 `kh web` 并携带生产前端资源。
+- Linux 固定使用 DuckDB 回测，不包含 PyQt 桌面界面、miniQMT/xtquant 和 Windows 实盘交易。服务器可用 `kh web --no-open`，长期公网使用建议监听 `127.0.0.1`，再通过 Nginx/Caddy 配置 HTTPS 域名和额外认证。
+- Linux 一键临时访问依赖官方 `cloudflared`；源码/wheel 不内置第三方二进制，可通过 PATH 提供，或设置 `KHQUANT_CLOUDFLARED_PATH`。
+- 默认配置保存到 `~/.khquant/settings.json`，权限为 `0600`；默认结果目录为 `~/khquant/backtest_results`；默认 Parquet 缓存位于 `${XDG_CACHE_HOME:-~/.cache}/khquant/parquet_cache_pack`。
+- Linux 回测默认以 `Asia/Shanghai` 解释行情时间，避免服务器时区不同导致跨平台结果漂移；Windows 与 macOS 不修改进程时区。
+- 股票库目录在 Linux 上优先使用标准大写 `SH/SZ/BJ`，同时兼容旧数据库的小写目录。
+- Linux 安装、升级和卸载以项目 `scripts/install.sh` 与 `docs/LINUX.md` 为准；安装脚本会校验 SHA256，并在升级前迁移旧版误存于包目录的回测结果。
+- 并发运行多个 CLI/网页回测时，每次运行使用独立临时 `.kh` 配置；启动新回测只清理一天前的残留文件，不能删除其他回测正在使用的配置。
+
+### DuckDB 大批量导入与短锁写入（v3.3.6.1+）
+
+当用户问到“大批量导入时数据库被占用 / metadata.db 被占用 / 看板能不能边导入边读取 / `kh data download` 写库模式”时，按以下口径解释：
+
+- 看海量化现在支持长任务短锁写入：大批量下载/导入时，行情数据先写入各股票 `.db`，跳过逐条 `metadata.db` 更新，任务收尾再批量刷新 `stock_list` 和 `sync_log`。
+- CLI `kh data download` 新增 `--db-write-mode auto|normal|short-lock`：
+  - `auto` 默认：小任务保持普通模式；任务数 `>=20` 或包含 `tick` 时自动短锁。
+  - `normal`：逐条写入后立即更新 metadata，适合小任务。
+  - `short-lock`：强制短锁，适合大股票池、tick、分钟线长区间。
+- 短锁解决的是 `metadata.db` 长时间被占用的问题：导入期间，股票列表、数据概览、看板这类依赖 metadata 的读取通常可以继续使用；收尾批量刷新 metadata 时只会短暂占用。
+- DuckDB 原生仍是单写者模型：正在写入的同一个股票 `.db` 文件，不保证能被另一个进程同时读取；读其它股票 `.db` 通常不受影响。
+- 当前开发版对单股票 `.db` 的跨进程占用统一处理：读端和写端都会先做 5 次指数退避重试；GUI 重试耗尽后提供“继续重试 / 先跳过 / 停止任务”。跳过项不会记入补充任务断点的已完成集合。
+- 回测不能再把文件占用静默当成“无数据”。桌面端会询问，CLI/网页等无阻塞回调场景默认跳过并明确告警；跳过清单写入回测目录 `duckdb_lock_skips.csv`，数量同步写入 `summary.csv`，CLI、网页结果卡和 HTML 报告都会提示。
+- 如果提示“数据已写入，但元数据刷新失败”，不要说数据丢了。正确处理是提示用户稍后执行扫描/修复元数据，例如 `kh data scan --fix --source <源>`，或在 GUI 数据库管理里扫描修复。
+
+### Tushare 下载（v3.3.8+）
+
+- 使用官方 Tushare 时，“API 地址”保持为空，软件会使用 SDK 默认数据接口；只有镜像或私有服务才填写对方提供的完整数据 API 地址。
+- “测试连接”会同时检查普通股票日线和指数日线。任一项不可用都会明确提示失败，不应继续下载。
+- `kh data download` 默认检查并补充 `000300.SH` 基准日线；指数自动使用 `index_daily`，不会再按普通股票下载。
+- 确实不需要自动基准时，可加 `--skip-benchmark`。未加该参数时，主任务成功但基准失败属于“部分成功”，命令返回非零状态。
+- `kh data info <代码>` 找不到数据、或 `kh data scan --stocks <代码>` 指定不存在的证券时，命令会明确报错并返回非零状态，便于脚本可靠判断。
+
 ### 排错流程
 
 1. 先让用户贴出完整错误信息
@@ -138,4 +186,4 @@ pip install numpy pandas duckdb matplotlib Pillow holidays requests psutil
 如果用户的问题不在上述场景中：
 1. 先阅读 `references/command-reference.md` 查找相关命令
 2. 如果仍无法解决，建议用户运行 `kh --help` 或 `kh <command> --help`
-3. 如需修改代码层面的功能，可以阅读项目的 `CLAUDE.md` 了解架构
+3. 如需修改代码层面的功能，先查看 KhQuant 源码仓库文档；仍无法解决时提交 Issue

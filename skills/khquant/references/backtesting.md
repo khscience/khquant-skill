@@ -93,7 +93,7 @@ kh run config.kh --period 5m
 
 khQuant 现在有两层性能设置：
 
-1. **全局性能预设**：写入 `%USERPROFILE%\.khquant\settings.json`，以后所有回测默认使用。
+1. **全局性能预设**：写入用户目录下的 `~/.khquant/settings.json`（Windows 即 `%USERPROFILE%\.khquant\settings.json`），以后所有回测默认使用。
 2. **单次回测覆盖**：只影响当前这条 `kh run` 命令，不修改全局配置。
 
 ### 全局性能预设

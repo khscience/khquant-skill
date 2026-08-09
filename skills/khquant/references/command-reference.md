@@ -6,6 +6,7 @@
 kh init                 首次使用引导配置
 kh config               查看/修改全局配置
 kh run                  执行回测
+kh web                  启动本地网页回测工作台
 kh data                 数据库管理
 kh result               回测结果管理
 kh strategy             策略管理
@@ -117,13 +118,35 @@ kh run config.kh --memory-profile standard --report
 
 ---
 
+## kh web
+
+页面内的完整操作方法见 `web-backtesting.md`。
+
+```bash
+kh web [config.kh] [--host 127.0.0.1] [--port 8766] [--no-open]
+```
+
+- 不带配置：启动网页工作台并打开最近使用的项目。
+- 带 `.kh`：启动前导入配置，读取其中的 `strategy_file`，自动带入入口 `.py`、递归引用的本地 Python 依赖及股票池 CSV；网页打开后直接进入该项目。
+- 本机网页的导入窗口可以只选择一个 `.kh`，也可以手动输入完整路径。
+- `--host 0.0.0.0` 可供局域网访问；远程浏览器不能触发服务器上的本机文件选择框，应上传完整项目或填写服务器路径。
+
+```bash
+kh web
+kh web "I:\策略研究\网格策略.kh"
+kh web config.kh --port 18771 --no-open
+kh web config.kh --host 0.0.0.0
+```
+
+---
+
 ## kh data
 
 ```bash
 kh data list [--market SH|SZ|BJ] [--period 1d|1m|5m|tick]
 kh data stats
 kh data info <code>
-kh data download --source <src> [--stocks x] [--pool x] [--file x] [--period 1d] [--start x] [--end x] [--adj front] [--force] [--workers 2]
+kh data download --source <src> [--stocks x] [--pool x] [--file x] [--period 1d] [--start x] [--end x] [--adj front] [--force] [--workers 2] [--db-write-mode auto|normal|short-lock]
 kh data scan [--period 1d] [--stocks x] [--start x] [--end x] [--fix] [--source x]
 kh data export <code> [--period 1d] [--start x] [--end x] [--output x]
 kh data repair [--db-path x] [--memory-limit 256MB]
@@ -132,6 +155,16 @@ kh data sync [--period 1d] [--source x] [--schedule HH:MM]
 ```
 
 数据源选项：`xtdata`（miniQMT 本地）、`baostock`（免费）、`tushare`（需 Token）、`http`（经桥接服务）
+
+`kh data download` 写库模式（v3.3.6.1+）：
+
+| 参数 | 含义 |
+|------|------|
+| `--db-write-mode auto` | 默认；小任务普通写入，任务数 `>=20` 或包含 `tick` 自动短锁 |
+| `--db-write-mode normal` | 每只股票写完立即更新 metadata，适合少量股票 |
+| `--db-write-mode short-lock` | 强制短锁：收尾批量刷新 `stock_list` 和 `sync_log`，适合大股票池、tick、分钟线长区间 |
+
+说明：短锁主要解决 `metadata.db` 被长任务持续占用的问题。导入期间股票列表、数据概览、看板这类 metadata 读取通常可继续使用；但正在写入的同一只股票 `.db` 仍不保证可跨进程同时读取，这是 DuckDB 文件锁限制。
 
 ---
 

@@ -56,6 +56,7 @@ kh data download --source baostock --file stocks.csv
 | `--adj` | `front` | 复权：`none`/`front`/`back`/`front_ratio`/`back_ratio` |
 | `--force` | 否 | 强制覆写已有数据 |
 | `--workers` | `2` | 并行进程数 |
+| `--db-write-mode` | `auto` | DuckDB 写库模式：`auto`/`normal`/`short-lock` |
 
 ### 典型场景
 
@@ -76,6 +77,46 @@ kh data download --source tushare --stocks 000001.SZ --adj front,back
 kh bridge status
 kh data download --source http --stocks 000001.SZ --period 1d
 ```
+
+### 数据管理中的 Tushare 补充
+
+- GUI 的“从 Tushare 导入数据”支持日线、1 分钟和 5 分钟行情。原始价是 DuckDB 基础字段并始终保存，可选同时生成前复权、后复权列。
+- 增量模式只检查用户选定的日期范围，不会再自动扩展到数据库全部历史区间。
+- 分钟线按每日记录数检查完整性：完整 1 分钟日为 241 根，完整 5 分钟日为 48 根；当天只有部分记录时会重新补充。
+- 网络、权限、限流和服务端错误与“正常无行情”分开处理，不会再把接口失败显示成“成功写入 0 条”。
+- Tushare GUI 默认使用短锁写入：每只股票写完立即释放 `.db`，任务收尾再批量更新 `metadata.db`。
+- 文件占用自动重试 5 次后，界面提供“继续重试 / 先跳过 / 停止任务”；结束日志和弹窗会列出占用跳过项。重试写库不会重复请求 Tushare 行情。
+
+### 大批量导入与短锁写入
+
+v3.3.6.1+ 的大批量下载/导入已支持 DuckDB 短锁写入，重点是减少 `metadata.db` 长时间占用：
+
+```bash
+# 默认 auto：小任务普通写入，大任务或 tick 自动短锁
+kh data download --source xtdata --pool hs300 --period 1m --start 20250101
+
+# 强制短锁，适合大股票池、tick、分钟线长区间
+kh data download --source xtdata --pool hs300 --period tick --db-write-mode short-lock
+
+# 强制普通模式，适合少量股票的小任务
+kh data download --source baostock --stocks 000001.SZ --period 1d --db-write-mode normal
+```
+
+写库模式说明：
+
+| 模式 | 行为 | 适用场景 |
+|------|------|----------|
+| `auto` | 默认模式；任务数 `>=20` 或包含 `tick` 自动启用短锁 | 推荐 |
+| `normal` | 每只股票写完立即更新 `metadata.db` | 小任务、排查问题 |
+| `short-lock` | 行情数据先写入各股票 `.db`，收尾再批量刷新 `stock_list` / `sync_log` | 大股票池、tick、分钟线长区间 |
+
+读取边界：
+
+- 导入期间，依赖 `metadata.db` 的股票列表、数据概览、看板通常可以继续读取；收尾批量刷新 metadata 时可能短暂占用。
+- 正在写入的同一个股票 `.db` 文件仍受 DuckDB 单写者限制，不保证跨进程同时读取；读取其它股票 `.db` 通常不受影响。
+- 当前开发版遇到单股票文件占用时，不会立即中止整批补充：系统先自动重试 5 次；仍未释放时，GUI 可选择继续重试、先跳过或停止任务。
+- 选择“先跳过”后，该股票/周期不会写进断点续传的已完成集合，下次补充仍会重新扫描；任务完成日志与完成弹窗会列出占用跳过清单。
+- 如果出现“数据已写入，但元数据刷新失败”，说明行情数据通常已入库，只是 `stock_list` / `sync_log` 未刷新。稍后执行扫描/修复元数据即可。
 
 ### 自动基准下载
 
@@ -133,6 +174,15 @@ kh data sync --source http --period 1d
 # 定时同步（工作日 15:30 执行，需要 schedule 库）
 kh data sync --schedule 15:30
 ```
+
+### 桌面端定时补充日历
+
+数据管理中的独立“定时数据补充”窗口会在状态栏与运行日志之间显示最近一年的每日执行情况：深蓝表示所选股票池与周期全部成功写入 DuckDB，浅蓝表示部分成功，白色表示跟踪开始后的交易日没有补齐，深灰表示休市或尚未纳入记录。悬停日期可查看完成数量、周期与股票池。
+
+- 统计基于 miniQMT 下载并成功写入 DuckDB 的实际任务结果，不扫描整库历史数据，因此不会拖慢窗口启动。
+- 多个周期会在整次任务结束后汇总，再原子写入 `~/.khquant/scheduled_data_sync_coverage.json`。
+- 日历只记录开始使用本定时补充模块后的任务结果，不代表数据库历史数据的实际完整情况；此前日期保持“未记录”，不会误判为缺失。
+- 从数据管理模块打开独立定时补充时，会先显示屏幕居中的启动提示；独立窗口进入事件循环后自动关闭提示，模块窗口本身也在调用方所在显示器居中打开。
 
 ## 数据修复
 
