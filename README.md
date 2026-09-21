@@ -3,8 +3,8 @@
 > 看海量化回测平台 (KhQuant) 的 AI Skill 插件 — 用自然语言完成数据管理、策略开发、桌面/CLI/Web 回测、结果分析和故障排查。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](#版本)
-[![KhQuant](https://img.shields.io/badge/KhQuant-v3.4.0-green.svg)](https://khsci.com/khQuant/)
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](#版本)
+[![KhQuant](https://img.shields.io/badge/KhQuant-v3.4.1-green.svg)](https://khsci.com/khQuant/)
 
 ---
 
@@ -34,15 +34,24 @@
 
 ## 适配版本
 
-- **当前 Skill 版本**：v1.2.0
-- **主要匹配软件版本**：KhQuant v3.4.0
+- **当前 Skill 版本**：v1.3.0
+- **主要匹配软件版本**：KhQuant v3.4.1
 - **基础兼容范围**：KhQuant v3.x
+- **需要 v3.4.1 的能力**：tx 数据源（`--source tx`）、同花顺扶摇数据源（`--source ths`）、`ths_api_key` 配置与脱敏显示、DuckDB 成交量统一按“手”存储。
 - **需要 v3.4.0 的能力**：完整 `kh web` 工作台、手机临时访问、Linux Web 发行物、DuckDB 占用诊断，以及 BaoStock/Tushare 按交易日缺口增量补充。
 - **需要 v3.3.6 或更高版本的能力**：性能预设 `performance_preset`、`kh run --memory-profile`、`performance_framework_history_preload_days`、`kh tool parquet-cache`、`kh bridge` 以及 `--source http` 桥接数据源。
 
 低于 v3.4.0 时仍可使用基础配置、数据管理、策略开发和普通回测规则，但不要假设 Web 或新版数据管理能力存在；先运行 `kh version` 和对应命令的 `--help` 确认。
 
 ## 更新日志
+
+### v1.3.0 (2026-09-22)
+
+- 适配 KhQuant V3.4.1，新增 tx 与同花顺（扶摇开放平台）两个数据源的下载、连通性检查和能力边界说明。
+- 数据源能力矩阵扩展到 6 个数据源，标明 tx 分钟线的可用历史窗口和同花顺目前只支持日线。
+- 敏感信息规则加入同花顺 API Key：由用户自己配置，Skill 不复述、不记录 Key。
+- 补充 DuckDB K 线成交量统一以“手”存储的规则，避免建议用户整表换算。
+- 故障排查新增“同花顺 API Key 未配置或无效”的处理流程。
 
 ### v1.2.0 (2026-08-09)
 
@@ -66,7 +75,7 @@
 ## 前提条件
 
 - **Claude Code**、**Codex** 或 **Cursor** 等支持 Skill/规则目录的 Agent 工具
-- **看海量化回测平台 v3.x**（推荐 V3.4.0，且 `kh` 命令可用）— 本 Skill 不兼容 v2
+- **看海量化回测平台 v3.x**（推荐 V3.4.1，且 `kh` 命令可用）— 本 Skill 不兼容 v2
 - 运行 `kh doctor` 检查当前平台、Python、核心依赖和数据目录
 
 > 如尚未安装看海量化回测平台，请前往官网获取：**[https://khsci.com/khQuant/](https://khsci.com/khQuant/)**
@@ -210,6 +219,7 @@ rmdir /S /Q "%USERPROFILE%\.claude\skills\khquant"
 
 ## 版本
 
+- **v1.3.0** — 主要匹配 KhQuant V3.4.1；新增 tx 与同花顺数据源、API Key 脱敏规则和成交量单位约定
 - **v1.2.0** — 主要匹配 KhQuant V3.4.0；新增完整 Web、手机临时访问、Linux Web、数据库锁诊断、增量补充及平台/分发边界
 - **v1.0.1** — 主要匹配 KhQuant v3.3.6.1；同步 KhQuant v3.3.6+ CLI 指令，补充性能设置、Parquet 缓存包和桥接数据源说明
 - **v1.0.0** — 适配 KhQuant CLI v3.x

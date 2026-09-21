@@ -182,3 +182,16 @@ ERR 文件未找到: xxx.py
 3. **详细模式**：`kh run config.kh --verbose` 查看 DEBUG 日志
 4. **检查数据**：`kh data info <代码>` 确认数据是否存在
 5. **获取帮助**：`kh <command> --help` 查看命令用法
+
+### 同花顺 API Key 未配置或无效
+
+**错误信息**：
+```
+ERR 同花顺 API Key 未配置或无效，请运行: python kh.py config set ths_api_key <API_KEY>
+```
+
+**处理**：
+1. 引导用户到扶摇开放平台免费申请 API Key。
+2. 由用户自己执行 `kh config set ths_api_key <API_KEY>`，或设置环境变量 `HITHINK_FINANCE_API_KEY`。
+3. 用 `kh data source test --source ths` 确认连通。
+不要在回复里复述或记录用户的 Key。

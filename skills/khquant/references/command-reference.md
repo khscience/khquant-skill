@@ -154,7 +154,7 @@ kh data update-pool
 kh data sync [--period 1d] [--source x] [--schedule HH:MM]
 ```
 
-数据源选项：`xtdata`（miniQMT 本地）、`baostock`（免费）、`tushare`（需 Token）、`http`（经桥接服务）
+数据源选项：`xtdata`（miniQMT 本地）、`baostock`（免费）、`tushare`（需 Token）、`tx`（免费，同 `tencent`）、`ths`（同花顺扶摇，需 API Key）、`http`（经桥接服务）。`--data-root` 目前只对 `tx` 和 `ths` 生效。
 
 `kh data download` 写库模式（v3.3.6.1+）：
 

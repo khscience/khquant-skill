@@ -73,6 +73,7 @@ kh config reset                                   # 重置为默认值
 | `strategy_dir` | string | | 策略目录 |
 | `baostock_enabled` | bool | `false` | 启用 BaoStock |
 | `tushare_token` | string | | Tushare Token（base64 存储）|
+| `ths_api_key` | string | | 同花顺（扶摇）API Key；`kh config show` 只显示打码后的首尾字符 |
 | `risk_free_rate` | float | `0.03` | 无风险利率 |
 | `auto_report` | bool | `false` | 回测后自动生成 HTML 报告 |
 | `volume_limit_enabled` | bool | `false` | 启用成交量限制 |
