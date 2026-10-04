@@ -163,7 +163,7 @@ khRequestNextDailyTrigger() -> bool
 
 ```
 khHistory(symbol_list, fields, bar_count, fre_step,
-          current_time=None, skip_paused=False, fq='pre', force_download=False)
+          current_time=None, skip_paused=False, fq=None, force_download=False)
 ```
 
 | 参数 | 类型 | 说明 |
@@ -172,9 +172,9 @@ khHistory(symbol_list, fields, bar_count, fre_step,
 | `fields` | list | 行情字段（`'open'`, `'close'`, `'high'`, `'low'`, `'volume'`, `'amount'` 等）|
 | `bar_count` | int | K 线数量 |
 | `fre_step` | str | K 线周期：`'1m'`, `'5m'`, `'1d'` |
-| `current_time` | str | 截止时间（**不含**该时间点的数据）。**回测中必须传入当前时间，防止读取未来数据** |
+| `current_time` | str | 截止时间（**不含**该时间点的数据）。回测中不传时自动以当前 K 线时间为截止（V3.4.1.7 起）；建议显式传入，代码更清楚 |
 | `skip_paused` | bool | 是否跳过停牌日（默认 False）|
-| `fq` | str | 复权类型（默认 `'pre'`）|
+| `fq` | str | 复权类型。默认 `None`：回测中跟随界面/配置的复权方式（`data.dividend_type`），独立调用时为前复权；显式传 `'pre'`/`'post'`/`'none'` 时按传入值，与界面口径不一致会打一次警告（V3.4.1.7 起，此前默认固定 `'pre'`）|
 | `force_download` | bool | 是否强制下载新数据（默认 False）|
 
 `current_time` 支持格式：`"YYYYMMDD"`, `"YYYY-MM-DD"`, `"YYYYMMDDHHMMSS"`, `"YYYY-MM-DD HH:MM:SS"`
@@ -214,10 +214,11 @@ khDuckDB(stock_list, period, fields=None, start_time=None, end_time=None,
 
 ```
 khMA(stock_code: str, period: int, field: str = 'close',
-     fre_step: str = '1d', end_time: str = None, fq: str = 'pre', data: Dict = None) -> float
+     fre_step: str = '1d', end_time: str = None, fq: str = None, data: Dict = None) -> float
 ```
 
-回测中建议传入 `end_time` 避免未来数据。
+- `fq` 与 khHistory 相同：默认跟随回测的复权方式，独立调用时为前复权。
+- 回测中不传 `end_time` 时自动以当前 K 线时间为截止（V3.4.1.7 起）；1m/5m/tick 周期在回测中不再检查电脑当前是否交易时段，夜间也能回测。实时运行时（不在回测中且未传 `end_time`）仍要求处于交易时段。
 
 ---
 

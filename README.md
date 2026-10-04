@@ -3,8 +3,8 @@
 > 看海量化回测平台 (KhQuant) 的 AI Skill 插件 — 用自然语言完成数据管理、策略开发、桌面/CLI/Web 回测、结果分析和故障排查。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](#版本)
-[![KhQuant](https://img.shields.io/badge/KhQuant-v3.4.1-green.svg)](https://khsci.com/khQuant/)
+[![Version](https://img.shields.io/badge/version-1.3.1-blue.svg)](#版本)
+[![KhQuant](https://img.shields.io/badge/KhQuant-v3.4.1.7-green.svg)](https://khsci.com/khQuant/)
 
 ---
 
@@ -34,9 +34,10 @@
 
 ## 适配版本
 
-- **当前 Skill 版本**：v1.3.0
-- **主要匹配软件版本**：KhQuant v3.4.1
+- **当前 Skill 版本**：v1.3.1
+- **主要匹配软件版本**：KhQuant v3.4.1.7
 - **基础兼容范围**：KhQuant v3.x
+- **需要 v3.4.1.7 的行为**：`khHistory` / `khMA` 不指定 `fq` 时跟随回测的复权方式（更早版本固定前复权），回测中不传时间参数时以当前 K 线为截止。
 - **需要 v3.4.1 的能力**：tx 数据源（`--source tx`）、同花顺扶摇数据源（`--source ths`）、`ths_api_key` 配置与脱敏显示、DuckDB 成交量统一按“手”存储。
 - **需要 v3.4.0 的能力**：完整 `kh web` 工作台、手机临时访问、Linux Web 发行物、DuckDB 占用诊断，以及 BaoStock/Tushare 按交易日缺口增量补充。
 - **需要 v3.3.6 或更高版本的能力**：性能预设 `performance_preset`、`kh run --memory-profile`、`performance_framework_history_preload_days`、`kh tool parquet-cache`、`kh bridge` 以及 `--source http` 桥接数据源。
@@ -44,6 +45,10 @@
 低于 v3.4.0 时仍可使用基础配置、数据管理、策略开发和普通回测规则，但不要假设 Web 或新版数据管理能力存在；先运行 `kh version` 和对应命令的 `--help` 确认。
 
 ## 更新日志
+
+### v1.3.1 (2026-10-04)
+
+- 适配 KhQuant V3.4.1.7：`khHistory` / `khMA` 的 `fq` 默认值改为跟随回测复权方式（独立调用仍为前复权），回测中不传时间参数时自动以当前 K 线为截止，分钟级指标在回测中不再受电脑当前时间限制。
 
 ### v1.3.0 (2026-09-22)
 
@@ -219,6 +224,7 @@ rmdir /S /Q "%USERPROFILE%\.claude\skills\khquant"
 
 ## 版本
 
+- **v1.3.1** — 主要匹配 KhQuant V3.4.1.7；更新 khHistory / khMA 的复权与截止时间默认行为
 - **v1.3.0** — 主要匹配 KhQuant V3.4.1；新增 tx 与同花顺数据源、API Key 脱敏规则和成交量单位约定
 - **v1.2.0** — 主要匹配 KhQuant V3.4.0；新增完整 Web、手机临时访问、Linux Web、数据库锁诊断、增量补充及平台/分发边界
 - **v1.0.1** — 主要匹配 KhQuant v3.3.6.1；同步 KhQuant v3.3.6+ CLI 指令，补充性能设置、Parquet 缓存包和桥接数据源说明
