@@ -125,7 +125,7 @@ pip install numpy pandas duckdb matplotlib Pillow holidays requests psutil
 ### V3.4.0 平台与分发边界
 
 - Windows V3 桌面版包含 GUI、CLI、完整 Web 工作台和 miniQMT/DuckDB 能力；macOS Apple Silicon V3 桌面版包含 GUI、CLI、完整 Web 工作台和 DuckDB，但不包含 miniQMT/xtquant。Windows/macOS 的 V3 桌面安装包只在官网内测版下载页向 VIP 用户提供。
-- V2.1 是官网公开下载版，不得用 V3 桌面安装包替换其公开入口。Windows/macOS V3 安装包只放风筑下载服务器，不上传 GitHub Release，也不得在公开页面暴露直链。
+- 开源版 V2 公开下载；Windows/macOS V3 桌面安装包不在 GitHub 发布。用户问下载时引导到官网内测版下载页，不要提供或猜测安装包直链。
 - CSkhQuant 的 V3.4.0 公开源码、Linux wheel/sdist、Docker 和 Linux 校验文件可以发布到 GitHub；这不等于公开 Windows/macOS V3 桌面安装包。
 - Linux 正式发行物包含 CLI 与完整 Web 工作台，支持 Ubuntu 22.04 / 24.04、Python 3.10—3.12。Linux wheel 和 Docker 都必须注册 `kh web` 并携带生产前端资源。
 - Linux 固定使用 DuckDB 回测，不包含 PyQt 桌面界面、miniQMT/xtquant 和 Windows 实盘交易。服务器可用 `kh web --no-open`，长期公网使用建议监听 `127.0.0.1`，再通过 Nginx/Caddy 配置 HTTPS 域名和额外认证。

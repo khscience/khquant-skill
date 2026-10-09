@@ -3,7 +3,7 @@
 > 看海量化回测平台 (KhQuant) 的 AI Skill 插件 — 用自然语言完成数据管理、策略开发、桌面/CLI/Web 回测、结果分析和故障排查。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-1.3.2-blue.svg)](#版本)
+[![Version](https://img.shields.io/badge/version-1.3.3-blue.svg)](#版本)
 [![KhQuant](https://img.shields.io/badge/KhQuant-v3.4.1.7-green.svg)](https://khsci.com/khQuant/)
 
 ---
@@ -34,7 +34,7 @@
 
 ## 适配版本
 
-- **当前 Skill 版本**：v1.3.2
+- **当前 Skill 版本**：v1.3.3
 - **主要匹配软件版本**：KhQuant v3.4.1.7
 - **基础兼容范围**：KhQuant v3.x
 - **需要 v3.4.1.7 的行为**：`khHistory` / `khMA` 不指定 `fq` 时跟随回测的复权方式（更早版本固定前复权），回测中不传时间参数时以当前 K 线为截止。
@@ -45,6 +45,11 @@
 低于 v3.4.0 时仍可使用基础配置、数据管理、策略开发和普通回测规则，但不要假设 Web 或新版数据管理能力存在；先运行 `kh version` 和对应命令的 `--help` 确认。
 
 ## 更新日志
+
+### v1.3.3 (2026-10-10)
+
+- 更正订单字段：`khHandlebar` 信号不写 `order_type` 时按市价单处理；`time_in_force` 只认 `day` / `gtd`；`expire_date` 须写成 `YYYY-MM-DD`。
+- 精简平台与分发说明，去掉内部发布细节。
 
 ### v1.3.2 (2026-10-09)
 
@@ -230,6 +235,7 @@ rmdir /S /Q "%USERPROFILE%\.claude\skills\khquant"
 
 ## 版本
 
+- **v1.3.3** — 更正订单类型默认值与 expire_date 格式，精简分发说明
 - **v1.3.2** — 修正策略开发文档（init 签名、current_time 格式、volume 单位），补充订单类型与挂单规则
 - **v1.3.1** — 主要匹配 KhQuant V3.4.1.7；更新 khHistory / khMA 的复权与截止时间默认行为
 - **v1.3.0** — 主要匹配 KhQuant V3.4.1；新增 tx 与同花顺数据源、API Key 脱敏规则和成交量单位约定

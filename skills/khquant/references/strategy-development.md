@@ -79,10 +79,10 @@ kh strategy info D:\CLIstrategies\我的策略.py
 
 | 字段 | 取值 | 说明 |
 |------|------|------|
-| `order_type` | `"limit"`（默认）/ `"market"` / `"stop"` / `"stop_limit"` | 限价单在当根能成交就成交，否则进入挂单队列；止损单需配 `stop_price` |
+| `order_type` | `"market"` / `"limit"` / `"stop"` / `"stop_limit"` | `khHandlebar` 的信号不写时按 `"market"`：按信号价成交，只有买价高于当根最高价、或卖价低于当根最低价时改按当前价（K 线用开盘价、Tick 用最新价）。`"limit"` 在当根能成交就成交，否则进入挂单队列。止损单需配 `stop_price` |
 | `stop_price` | float | 止损触发价。止损单触发后按止损价成交，跳空越过时按开盘价，并限制在当根最高、最低价之间 |
-| `time_in_force` | `"day"`（默认）/ `"gtd"` / `"gtc"` | 当日有效 / 到 `expire_date` 有效 / 一直有效 |
-| `expire_date` | `"YYYYMMDD"` | 配合 `gtd` 使用 |
+| `time_in_force` | `"day"`（默认）/ `"gtd"` | 当日有效 / 到 `expire_date` 收盘有效；写其他值的挂单不会自动过期 |
+| `expire_date` | `"YYYY-MM-DD"` | 配合 `gtd` 使用。必须带短横线，写成 `YYYYMMDD` 会导致挂单永不过期 |
 
 盘前、盘后回调返回的信号不会当场成交：`khPreMarket` 的信号默认转为当日有效的限价挂单，开盘后撮合；`khPostMarket` 的信号默认转为限价挂单，有效到下一个交易日收盘（`gtd`）。
 
