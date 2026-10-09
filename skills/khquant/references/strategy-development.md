@@ -10,6 +10,8 @@ kh strategy create 我的策略
 - `我的策略.py` — 策略代码（含标准回调函数模板）
 - `我的策略.kh` — 回测配置（默认参数）
 
+> **V3.4.1.9 及更早版本注意**：生成的模板里是 `def init():`，框架实际调用 `init(stock_codes, init_data)`，不改会报 `takes 0 positional arguments`；生成的 .kh 也缺 `backtest.trigger` 和 `data.fields`，会按 Tick 触发或报 `KeyError 'fields'`。用旧版本时，创建后先把 init 改成两个参数，并在 .kh 里补 `"trigger": {"type": "1d"}`、`"dividend_type": "front"` 和 `fields`（可照抄内置双均线案例的 .kh）；更稳妥的做法是直接复制内置案例的 .py 和 .kh 再改。
+
 可指定输出目录：
 
 ```bash
@@ -42,7 +44,7 @@ kh strategy info D:\CLIstrategies\我的策略.py
 
 | 函数 | 级别 | 签名 | 调用时机 | 返回值 |
 |------|------|------|---------|--------|
-| `init(stock_list, data)` | 推荐 | `init(stock_list: list, data: dict)` | 回测开始前调用一次 | 无 |
+| `init(stock_codes, init_data)` | **必需** | `init(stock_codes: list, init_data: dict)` | 回测开始前调用一次（框架无条件调用，缺少或参数个数不对都会报错） | 无 |
 | `khHandlebar(data)` | **必需** | `khHandlebar(data: Dict) -> List[Dict]` | 每根 K 线 / 每次触发 | 信号列表 |
 | `khPreMarket(data)` | 可选 | `khPreMarket(data: Dict) -> List[Dict]` | 每个交易日开盘前 | 信号列表 |
 | `khPostMarket(data)` | 可选 | `khPostMarket(data: Dict) -> List[Dict]` | 每个交易日收盘后 | 信号列表 |
@@ -67,11 +69,22 @@ kh strategy info D:\CLIstrategies\我的策略.py
     "code": "000001.SZ",    # 股票代码（必须含交易所后缀）
     "action": "buy",         # buy 或 sell
     "price": 10.50,          # 委托价格
-    "volume": 100,           # 委托数量（必须是 100 的整数倍）
+    "volume": 100,           # 委托数量，单位是「股」（不是手），买入须为 100 的整数倍
     "reason": "金叉信号",     # 交易理由（记录到交易日志）
     "timestamp": 1700000000  # 时间戳（generate_signal 自动填充）
 }
 ```
+
+可选字段（撮合引擎始终开启）：
+
+| 字段 | 取值 | 说明 |
+|------|------|------|
+| `order_type` | `"limit"`（默认）/ `"market"` / `"stop"` / `"stop_limit"` | 限价单在当根能成交就成交，否则进入挂单队列；止损单需配 `stop_price` |
+| `stop_price` | float | 止损触发价。止损单触发后按止损价成交，跳空越过时按开盘价，并限制在当根最高、最低价之间 |
+| `time_in_force` | `"day"`（默认）/ `"gtd"` / `"gtc"` | 当日有效 / 到 `expire_date` 有效 / 一直有效 |
+| `expire_date` | `"YYYYMMDD"` | 配合 `gtd` 使用 |
+
+盘前、盘后回调返回的信号不会当场成交：`khPreMarket` 的信号默认转为当日有效的限价挂单，开盘后撮合；`khPostMarket` 的信号默认转为限价挂单，有效到下一个交易日收盘（`gtd`）。
 
 ---
 
@@ -177,7 +190,7 @@ khHistory(symbol_list, fields, bar_count, fre_step,
 | `fq` | str | 复权类型。默认 `None`：回测中跟随界面/配置的复权方式（`data.dividend_type`），独立调用时为前复权；显式传 `'pre'`/`'post'`/`'none'` 时按传入值，与界面口径不一致会打一次警告（V3.4.1.7 起，此前默认固定 `'pre'`）|
 | `force_download` | bool | 是否强制下载新数据（默认 False）|
 
-`current_time` 支持格式：`"YYYYMMDD"`, `"YYYY-MM-DD"`, `"YYYYMMDDHHMMSS"`, `"YYYY-MM-DD HH:MM:SS"`
+`current_time` 支持格式：`"YYYYMMDD"`, `"YYYY-MM-DD"`, `"YYYYMMDD HHMMSS"`（中间有空格）, `"YYYY-MM-DD HH:MM:SS"`。不支持 `"YYYYMMDDHHMMSS"` 连写（会抛 ValueError）。最稳妥的是直接传 `khGet(data, 'date_num')` 或 `khGet(data, 'datetime_str')`。
 
 返回值：`dict`，键为股票代码，值为 `pandas.DataFrame`。
 
@@ -669,6 +682,7 @@ import logging  # 已包含在 khQuantImport 中
 logging.info("一般信息，绿色显示")
 logging.warning("警告信息，橙色显示")
 logging.error("错误信息，红色显示")
+logging.info("[TRADE] 买入 000001.SZ 100 股")  # 带 [TRADE] 标签的消息在界面日志中按交易记录高亮
 ```
 
 在关键决策点添加日志有助于调试和监控策略运行状态。
