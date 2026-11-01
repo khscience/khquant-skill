@@ -3,7 +3,7 @@
 > 看海量化回测平台 (KhQuant) 的 AI Skill 插件 — 用自然语言完成数据管理、策略开发、桌面/CLI/Web 回测、结果分析和故障排查，并能把 khQuant 回测策略迁移到大QMT 内置 Python。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-1.4.0-blue.svg)](#版本)
+[![Version](https://img.shields.io/badge/version-1.4.1-blue.svg)](#版本)
 [![KhQuant](https://img.shields.io/badge/KhQuant-v3.4.1.7-green.svg)](https://khsci.com/khQuant/)
 
 ---
@@ -37,7 +37,7 @@
 
 ## 适配版本
 
-- **当前 Skill 版本**：v1.4.0
+- **当前 Skill 版本**：v1.4.1
 - **`khquant-to-qmt`**：依据 KhQuant V3.4.1.11 源码和迅投内置 Python 手册（线上文件时间 2026-07-27）编写，2026-11-01 在券商版大QMT 实际回测验证；离线自检需要本机装有 KhQuant 和对应的本地数据
 - **主要匹配软件版本**：KhQuant v3.4.1.7
 - **基础兼容范围**：KhQuant v3.x
@@ -50,12 +50,20 @@
 
 ## 更新日志
 
+### v1.4.1 (2026-11-01)
+
+- `khquant-to-qmt` 做了一轮全面测试：12 个功能场景和 8 个 khQuant 内置策略，成交全部和 khQuant 引擎逐笔一致。
+- 兼容层按 khQuant 的实际行为修正三处：涨跌停校验（市价单不校验，限价、止损单有 `preClose` 就校验）、挂单 `max_pending_bars` 的计数、持仓均价 `avg_price` 的口径。
+- `[设置]` 行直接打印回测参数界面要填的百分数；`[自检]` 打印 QMT 内置 Python 版本，资金核对改为按 QMT 收费推算。
+- 离线自检比对同一根 K 线里的多笔成交时不再受记录顺序影响。
+- 清单增加持仓均价口径（B18）和 `__file__` 路径（C14），共 46 项。
+
 ### v1.4.0 (2026-11-01)
 
 - 新增 `khquant-to-qmt` Skill：把 khQuant 回测策略迁移到大QMT 内置 Python（Python 3.6）回测。
 - 兼容层 `kh_compat_qmt.py` 在大QMT 里模拟 khQuant 的信号列表、市价/限价/止损单与有效期、盘前盘后回调、日内多次触发、T+1、涨跌停拒单和股数计算，策略代码基本原样粘贴。
 - 离线自检 `offline_check.py` 用 khQuant 本地数据模拟 QMT 撮合，逐笔对照成交，比较期末资产，并在两种滑点处理方式里推荐更接近的一种。
-- 列出 14 项大QMT 做不到、17 项做法不同、13 项需要实测的内容；其中账号写法、行情索引格式、前复权差异等已在真实大QMT 回测里确认。
+- 列出 14 项大QMT 做不到、18 项做法不同、14 项需要实测的内容；其中账号写法、行情索引格式、前复权差异等已在真实大QMT 回测里确认。
 
 ### v1.3.3 (2026-10-10)
 
@@ -271,6 +279,7 @@ rmdir /S /Q "%USERPROFILE%\.claude\skills\khquant-to-qmt"
 
 ## 版本
 
+- **v1.4.1** — `khquant-to-qmt` 全面测试后修正涨跌停、挂单计数和持仓均价口径，补真实大QMT 实测结论
 - **v1.4.0** — 新增 `khquant-to-qmt`：把 khQuant 回测策略迁移到大QMT 内置 Python，含兼容层、离线自检和做不到清单
 - **v1.3.3** — 更正订单类型默认值与 expire_date 格式，精简分发说明
 - **v1.3.2** — 修正策略开发文档（init 签名、current_time 格式、volume 单位），补充订单类型与挂单规则

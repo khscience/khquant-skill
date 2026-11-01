@@ -14,6 +14,7 @@
 # 或让用户直接复制粘贴进 QMT 策略编辑器。
 # =============================================================================
 import math
+import sys
 import datetime as dt
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
@@ -52,9 +53,11 @@ KH_CONFIG = {
     #   'commission'（默认）：委托价不加滑点（总在当根高低点内），把单边滑点折进 QMT 的佣金率；
     #                         init 会打印 QMT 回测参数该填的佣金率。资金曲线最接近 khQuant。
     #   'price'：按 khQuant 口径把滑点加进委托价；超出当根高低点的只能按端点下单，滑点会被吞掉一部分。
-    # 两种模式 QMT 回测参数里的「滑点」都填 0。
+    #            用限价单、盘前盘后挂单的策略多半选它：khQuant 限价成交的滑点不越过限价，常常等于没有滑点。
+    # 两种模式 QMT 回测参数里的「滑点」都填 0。以离线自检推荐的为准。
     'slippage_mode': 'commission',
-    # 模拟 khQuant 的涨跌停拒单（只在不复权时生效，和 khQuant 一致）
+    # 模拟 khQuant 的涨跌停拒单：市价单不校验；限价、止损单在行情有 preClose 时校验（和复权方式无关）。
+    # .kh 的 data.fields 里没有 preClose 时 khQuant 不校验，这里改成 False。
     'check_price_limit': True,
     # T+1：None 表示按股票池自动判断（全部在 t0_codes 里才按 T+0）
     't_plus_1': None,
@@ -132,6 +135,7 @@ _S.qmt_cash = 0.0
 _S.selfcheck_done = 0
 _S.selfcheck_pending = []
 _S.selfcheck_env_done = False
+_S.kh_cost = {}      # 代码 -> khQuant 口径持仓均价（跨天保留，清仓时删除）
 
 
 def _warn_once(key, msg):
@@ -341,29 +345,68 @@ def _price_limits(code, bar):
     return up, down
 
 
-def _limit_reject(code, action, bar, order_price=None):
-    """返回拒单原因；空字符串表示可以交易。"""
-    if not KH_CONFIG['check_price_limit'] or KH_CONFIG['dividend_type'] != 'none':
+def _suspended(bar):
+    """khQuant 挂单撮合时把 成交量=0 且 最高=最低=收盘 的 K 线当停牌跳过。"""
+    if _finite_positive(bar.get('volume')) > 0 or bar.get('volume') is None:
+        return False
+    h, l, c = (_finite_positive(bar.get(k)) for k in ('high', 'low', 'close'))
+    return h > 0 and abs(h - l) < 0.001 and abs(h - c) < 0.001
+
+
+def _one_line(bar, price):
+    o, h, l = (_finite_positive(bar.get(k)) for k in ('open', 'high', 'low'))
+    return o > 0 and abs(o - price) < 0.01 and abs(h - price) < 0.01 and abs(l - price) < 0.01
+
+
+def _outside_limits(action, price, up, down):
+    price = _finite_positive(price)
+    if price <= 0:
+        return False
+    return price > up + 0.001 if action == 'buy' else price < down - 0.001
+
+
+def _limit_reject(order, bar):
+    """回调当根发出的委托：khQuant 撮合前的涨跌停校验（khFrame 当根撮合路径）。返回拒单原因，空字符串表示通过。
+    和 khQuant 一样：市价单不校验；限价、止损、止损限价单只要行情里有 preClose 且当根高低点落在
+    按昨收算出的涨跌停区间内就校验，和复权方式无关。拒单后委托作废，不进挂单簿。"""
+    if not KH_CONFIG['check_price_limit'] or order['order_type'] == 'market':
         return ''
-    limits = _price_limits(code, bar)
+    limits = _price_limits(order['code'], bar)
     if limits is None:
         return ''
     up, down = limits
-    o, h, l, c = (_finite_positive(bar.get(k)) for k in ('open', 'high', 'low', 'close'))
-    if action == 'buy' and abs(o - up) < 0.01 and abs(h - up) < 0.01 and abs(l - up) < 0.01:
+    action, c = order['action'], _finite_positive(bar.get('close'))
+    if action == 'buy' and _one_line(bar, up):
         return '一字涨停，无法买入'
-    if action == 'sell' and abs(o - down) < 0.01 and abs(h - down) < 0.01 and abs(l - down) < 0.01:
+    if action == 'sell' and _one_line(bar, down):
         return '一字跌停，无法卖出'
     if action == 'buy' and c >= up - 0.001:
         return '涨停无法买入'
     if action == 'sell' and c <= down + 0.001:
         return '跌停无法卖出'
-    if order_price is not None:
-        if action == 'buy' and order_price > up + 0.001:
-            return '委托价高于涨停价'
-        if action == 'sell' and order_price < down - 0.001:
-            return '委托价低于跌停价'
+    if order['order_type'] == 'limit' and _outside_limits(action, order['price'], up, down):
+        return '限价委托价越出涨跌停'
     return ''
+
+
+def _limit_block_pending(order, bar):
+    """挂单本根能成交时的涨跌停校验（khFrame._check_price_limit_for_pending）。返回 True 表示本根不成交、继续挂单。"""
+    if not KH_CONFIG['check_price_limit']:
+        return False
+    limits = _price_limits(order['code'], bar)
+    if limits is None:
+        return False
+    up, down = limits
+    kind, action = order['order_type'], order['action']
+    if kind == 'limit' or (kind == 'stop_limit' and order.get('triggered')):
+        if _outside_limits(action, order['price'], up, down):
+            return True
+    if _one_line(bar, up if action == 'buy' else down):
+        return True
+    if kind == 'market':
+        return False
+    c = _finite_positive(bar.get('close'))
+    return (action == 'buy' and c >= up - 0.001) or (action == 'sell' and c <= down + 0.001)
 
 
 # ---------- 账户与持仓 ----------
@@ -391,7 +434,7 @@ def _read_positions():
         else:
             can_use = min(can_use, max(0, volume - _S.today_bought.get(code, 0)))
         result[code] = {'volume': volume, 'can_use_volume': can_use,
-                        'avg_price': float(getattr(p, 'm_dOpenPrice', 0.0)),
+                        'avg_price': _S.kh_cost.get(code, float(getattr(p, 'm_dOpenPrice', 0.0))),
                         'current_price': 0.0,
                         'market_value': float(getattr(p, 'm_dMarketValue', 0.0))}
     return result
@@ -656,18 +699,29 @@ def _match_price(order, bar):
     return price
 
 
-def _execute(order, bar, data, date8):
-    """按 khQuant 口径检查后，用 QMT 指定价下单，并更新本地账户副本。返回是否成交。"""
+def _execute(order, bar, data, date8, pending=False):
+    """按 khQuant 口径检查后，用 QMT 指定价下单，并更新本地账户副本。返回是否成交。
+    pending=False：回调当根发出的委托；True：挂单簿里的委托。两条路径的涨跌停规则不同，和 khQuant 一致。"""
     code, action, volume = order['code'], order['action'], int(order['remaining_volume'])
-    reject = _limit_reject(code, action, bar,
-                           float(order['price']) if order['order_type'] in ('limit', 'stop_limit') else None)
-    if reject:
-        if order['order_type'] in ('limit', 'stop_limit') and reject.startswith('委托价'):
+    if not pending:
+        reject = _limit_reject(order, bar)
+        if reject:
             order['remaining_volume'] = 0
-        logging.warning('拒单 %s %s %d股：%s' % (code, action, volume, reject))
-        return False
+            logging.warning('拒单 %s %s %d股：%s' % (code, action, volume, reject))
+            return False
+    was_triggered = order.get('triggered')
     base = _match_price(order, bar)
+    if (not pending and order['order_type'] == 'stop_limit' and order.get('triggered') and not was_triggered
+            and KH_CONFIG['check_price_limit']):
+        limits = _price_limits(code, bar)
+        if limits and _outside_limits(action, order['price'], limits[0], limits[1]):
+            # 止损限价单当根触发后，限价越出涨跌停：khQuant 直接拒单
+            order['remaining_volume'] = 0
+            logging.warning('拒单 %s %s %d股：限价委托价越出涨跌停' % (code, action, volume))
+            return False
     if base is None:
+        return False
+    if pending and _limit_block_pending(order, bar):
         return False
     decimals = get_price_decimals(stock_code=code)
     # fill：khQuant 口径的成交价（含滑点），用来记本地账、算资金
@@ -708,7 +762,9 @@ def _execute(order, bar, data, date8):
         pos = positions.setdefault(code, {'volume': 0, 'can_use_volume': 0, 'avg_price': 0.0,
                                           'current_price': fill, 'market_value': 0.0})
         total = pos['volume'] + volume
-        pos['avg_price'] = (pos['avg_price'] * pos['volume'] + fill * volume) / total
+        # 持仓均价按 khQuant 口径：含滑点的成交价按股数加权、取到价格精度、不含费用（QMT 的开仓均价口径不同）
+        pos['avg_price'] = round((pos['avg_price'] * pos['volume'] + fill * volume) / total, decimals)
+        _S.kh_cost[code] = pos['avg_price']
         pos['volume'] = total
         if _S.t0_mode:
             pos['can_use_volume'] += volume
@@ -728,6 +784,7 @@ def _execute(order, bar, data, date8):
         pos['can_use_volume'] -= volume
         if pos['volume'] <= 0:
             positions.pop(code, None)
+            _S.kh_cost.pop(code, None)
     order['remaining_volume'] = 0
     _S.trade_log.append((_S.bar14, code, action, volume, order_price, fill))
     if KH_CONFIG['verbose']:
@@ -761,6 +818,8 @@ def _selfcheck_bar(C, expect_cash):
     if not _S.selfcheck_env_done:
         _S.selfcheck_env_done = True
         acc = get_trade_detail_data(KH_CONFIG['account_id'], 'stock', 'account')
+        print('[自检] QMT 内置 Python %s；pandas %s；numpy %s' % (
+            sys.version.split()[0], pd.__version__, np.__version__))
         print('[自检] 第一根 K 线 %s；主图周期 %s；回测账号 %s 查到资金 %s' % (
             _S.bar14, getattr(C, 'period', '?'), KH_CONFIG['account_id'],
             ('%.2f' % acc[0].m_dAvailable) if acc else '查不到（检查 account_id，回测里查询和下单要用同一个字符串）'))
@@ -849,12 +908,17 @@ def _match_pending(bars, data):
     date8 = khGet(data, 'date_num')
     for order in list(_S.pending):
         bar = bars.get(order['code'])
-        if bar is not None:
-            _execute(order, bar, data, date8)
-            order['bars_waited'] += 1
-        if order['remaining_volume'] <= 0:
+        if bar is None:
+            continue
+        # 和 khQuant 一样：先计数，超过 max_pending_bars 根才作废（第 max+1 根开头作废，前 max 根都能成交）
+        order['bars_waited'] += 1
+        if order['max_pending_bars'] and order['bars_waited'] > order['max_pending_bars']:
             _S.pending.remove(order)
-        elif order['max_pending_bars'] and order['bars_waited'] >= order['max_pending_bars']:
+            continue
+        if _suspended(bar):
+            continue
+        _execute(order, bar, data, date8, pending=True)
+        if order['remaining_volume'] <= 0:
             _S.pending.remove(order)
 
 

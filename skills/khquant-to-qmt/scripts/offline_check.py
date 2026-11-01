@@ -263,6 +263,10 @@ def compare(res, kh, kh_final, period):
     if kh is None:
         print(qm.to_string(index=False))
         return len(qm) > 0, None
+    # 同一根 K 线里的多笔成交，两边记录顺序可能不同（例如先卖后买、多只股票），按 时间、代码、方向 排好再逐笔比
+    key = ['time', 'code', 'action']
+    qm = qm.sort_values(key, kind='mergesort').reset_index(drop=True)
+    kh = kh.sort_values(key, kind='mergesort').reset_index(drop=True)
     ok = True
     if len(qm) == 0:
         print('不通过：兼容层一笔都没成交。先看日志里的拒单、取不到数据、账号查不到等提示')
