@@ -1,0 +1,4 @@
+interface:
+  display_name: "khQuant 策略迁移到大QMT"
+  short_description: "把看海量化回测策略改成大QMT内置Python，并说明QMT做不到的部分"
+  default_prompt: "使用 $khquant-to-qmt 把我的 khQuant 策略迁移到大QMT，先告诉我哪些功能QMT做不到。"
