@@ -3,7 +3,7 @@
 > 看海量化回测平台 (KhQuant) 的 AI Skill 插件 — 用自然语言完成数据管理、策略开发、桌面/CLI/Web 回测、结果分析和故障排查，并能把 khQuant 回测策略迁移到大QMT 内置 Python。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-1.4.2-blue.svg)](#版本)
+[![Version](https://img.shields.io/badge/version-1.4.3-blue.svg)](#版本)
 [![KhQuant](https://img.shields.io/badge/KhQuant-v3.4.1.13-green.svg)](https://khsci.com/khQuant/)
 
 ---
@@ -37,7 +37,7 @@
 
 ## 适配版本
 
-- **当前 Skill 版本**：v1.4.2
+- **当前 Skill 版本**：v1.4.3
 - **`khquant-to-qmt`**：依据 KhQuant V3.4.1.11 源码和迅投内置 Python 手册（线上文件时间 2026-07-27）编写，2026-11-01 在券商版大QMT 实际回测验证；离线自检需要本机装有 KhQuant 和对应的本地数据
 - **主要匹配软件版本**：KhQuant v3.4.1.13
 - **基础兼容范围**：KhQuant v3.x
@@ -50,6 +50,10 @@
 低于 v3.4.0 时仍可使用基础配置、数据管理、策略开发和普通回测规则，但不要假设 Web 或新版数据管理能力存在；先运行 `kh version` 和对应命令的 `--help` 确认。
 
 ## 更新日志
+
+### v1.4.3 (2026-11-18)
+
+- tdx：通达信 V7.73 的盘后数据下载在「选项」菜单（老版本在「系统」）；补充实测限制：1 分钟线只能下最近 100 天，5 分钟线最近 700 天。
 
 ### v1.4.2 (2026-11-17)
 
@@ -285,6 +289,7 @@ rmdir /S /Q "%USERPROFILE%\.claude\skills\khquant-to-qmt"
 
 ## 版本
 
+- **v1.4.3** — tdx 盘后数据下载菜单路径更正，补 1/5 分钟线可下载天数
 - **v1.4.2** — 适配 KhQuant V3.4.1.13：去掉已下线的 tx 数据源，新增 tdx（通达信）数据源说明
 - **v1.4.1** — `khquant-to-qmt` 全面测试后修正涨跌停、挂单计数和持仓均价口径，补真实大QMT 实测结论
 - **v1.4.0** — 新增 `khquant-to-qmt`：把 khQuant 回测策略迁移到大QMT 内置 Python，含兼容层、离线自检和做不到清单

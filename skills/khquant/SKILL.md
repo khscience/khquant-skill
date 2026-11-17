@@ -156,7 +156,7 @@ pip install numpy pandas duckdb matplotlib Pillow holidays requests psutil
 - **v3.4.1.13 起 tx（腾讯）数据源已下线**：GUI 和 CLI 都不再提供，`--source tx` 会提示改用其他数据源。库里已有的 tx 数据不受影响；`--repair-volume-units` 等旧库单位核验仍保留。用户要免费、无需账号的日线，推荐 BaoStock。
 - **tdx（通达信，v3.4.1.13+）** 用 `--source tdx`（同 `tqcenter`），只支持 **Windows 64 位**，要求本机安装并登录支持 TQ 策略的通达信新版客户端（安装目录有 `PYPlugins/user/tqcenter.py` 和 `TPythClient.dll`，SDK 1.1.0～2.0 之前），不需要 API Key。客户端目录在 设置 → 数据设置 → tdx客户端目录，或用 `--tdx-path`。
 - tdx 能下：沪深 A 股（60/68/00/30）、沪市 5 开头和深市 15 开头 ETF、`000300.SH` 日线（基准）；周期 `1d`/`1m`/`5m`；复权 `none`/`front`/`back`。不支持：北交所、可转债、LOF/场内基金、其他指数、Tick、等比复权。
-- tdx 日线可取长历史；**分钟线只读客户端“系统 → 盘后数据下载”下到本地的数据**，没下载的日期返回空（记为空返回，不是失败），提醒用户先在通达信里下载 1/5 分钟线。CLI 不写 `--start` 时 tdx 只取最近 30 天；16:00 前不含当天。
+- tdx 日线可取长历史；**分钟线只读客户端“选项 → 盘后数据下载”（老版本在“系统”菜单）下到本地的数据，1 分钟线只能下最近 100 天、5 分钟线最近 700 天**，没下载的日期返回空（记为空返回，不是失败），提醒用户先在通达信里下载 1/5 分钟线。CLI 不写 `--start` 时 tdx 只取最近 30 天；16:00 前不含当天。
 - tdx 数据仅限本人使用，不得转售或再分发（通达信用户服务协议）。
 - **同花顺（扶摇开放平台）** 用 `--source ths`，需要用户在扶摇平台免费申请 API Key，目前支持 A 股日线和 `none`/`front`/`back` 复权。未配置 Key 时下载会直接报错并提示 `kh config set ths_api_key <API_KEY>`。
 - `--data-root <目录>` 目前支持 ths、tdx、tushare、qmt_native（BaoStock 不支持）；ths 和 tdx 默认补充 `000300.SH` 基准日线。
