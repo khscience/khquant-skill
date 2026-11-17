@@ -15,7 +15,7 @@
 | 后比例复权 back_ratio | OK | - | - | - | - | 取决于桥接端 |
 | 安装要求 | QMT 客户端运行 | `pip install baostock` | Token + `pip install tushare` | 仅 Windows 64 位，支持 TQ 策略的通达信客户端 | `kh config set ths_api_key <API_KEY>` | 先运行 `kh bridge serve` 或配置远端桥接服务 |
 
-tdx 品种范围：沪深 A 股、沪深 ETF（不含 LOF）、`000300.SH` 日线；不支持北交所、可转债、其他指数。tx（腾讯）数据源已在 v3.4.1.12 下线，库里已有数据不受影响。
+tdx 品种范围：沪深 A 股、沪深 ETF（不含 LOF）、`000300.SH` 日线；不支持北交所、可转债、其他指数。tx（腾讯）数据源已在 v3.4.1.13 下线，库里已有数据不受影响。
 
 所有数据源写入 DuckDB 时，K 线 `volume` 统一以“手”存储，`amount` 以元存储。
 

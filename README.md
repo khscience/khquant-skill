@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Version](https://img.shields.io/badge/version-1.4.2-blue.svg)](#版本)
-[![KhQuant](https://img.shields.io/badge/KhQuant-v3.4.1.12-green.svg)](https://khsci.com/khQuant/)
+[![KhQuant](https://img.shields.io/badge/KhQuant-v3.4.1.13-green.svg)](https://khsci.com/khQuant/)
 
 ---
 
@@ -39,9 +39,9 @@
 
 - **当前 Skill 版本**：v1.4.2
 - **`khquant-to-qmt`**：依据 KhQuant V3.4.1.11 源码和迅投内置 Python 手册（线上文件时间 2026-07-27）编写，2026-11-01 在券商版大QMT 实际回测验证；离线自检需要本机装有 KhQuant 和对应的本地数据
-- **主要匹配软件版本**：KhQuant v3.4.1.12
+- **主要匹配软件版本**：KhQuant v3.4.1.13
 - **基础兼容范围**：KhQuant v3.x
-- **需要 v3.4.1.12 的能力**：tdx（通达信）数据源（`--source tdx`，仅 Windows，需本机通达信客户端）、`kh data repair-front`。v3.4.1.12 起 tx（腾讯）数据源已下线，更早版本仍可使用 `--source tx`。
+- **需要 v3.4.1.13 的能力**：tdx（通达信）数据源（`--source tdx`，仅 Windows，需本机通达信客户端）、`kh data repair-front`。v3.4.1.13 起 tx（腾讯）数据源已下线，更早版本仍可使用 `--source tx`。
 - **需要 v3.4.1.7 的行为**：`khHistory` / `khMA` 不指定 `fq` 时跟随回测的复权方式（更早版本固定前复权），回测中不传时间参数时以当前 K 线为截止。
 - **需要 v3.4.1 的能力**：同花顺扶摇数据源（`--source ths`）、`ths_api_key` 配置与脱敏显示、DuckDB 成交量统一按“手”存储。
 - **需要 v3.4.0 的能力**：完整 `kh web` 工作台、手机临时访问、Linux Web 发行物、DuckDB 占用诊断，以及 BaoStock/Tushare 按交易日缺口增量补充。
@@ -53,7 +53,7 @@
 
 ### v1.4.2 (2026-11-17)
 
-- 适配 KhQuant V3.4.1.12：去掉已下线的 tx（腾讯）数据源，新增 tdx（通达信）数据源的用法、品种与周期边界（仅 Windows，分钟线来自客户端盘后数据下载）。
+- 适配 KhQuant V3.4.1.13：去掉已下线的 tx（腾讯）数据源，新增 tdx（通达信）数据源的用法、品种与周期边界（仅 Windows，分钟线来自客户端盘后数据下载）。
 - 更正 `--data-root` 的适用数据源：ths、tdx、tushare、qmt_native。
 
 ### v1.4.1 (2026-11-01)
@@ -285,7 +285,7 @@ rmdir /S /Q "%USERPROFILE%\.claude\skills\khquant-to-qmt"
 
 ## 版本
 
-- **v1.4.2** — 适配 KhQuant V3.4.1.12：去掉已下线的 tx 数据源，新增 tdx（通达信）数据源说明
+- **v1.4.2** — 适配 KhQuant V3.4.1.13：去掉已下线的 tx 数据源，新增 tdx（通达信）数据源说明
 - **v1.4.1** — `khquant-to-qmt` 全面测试后修正涨跌停、挂单计数和持仓均价口径，补真实大QMT 实测结论
 - **v1.4.0** — 新增 `khquant-to-qmt`：把 khQuant 回测策略迁移到大QMT 内置 Python，含兼容层、离线自检和做不到清单
 - **v1.3.3** — 更正订单类型默认值与 expire_date 格式，精简分发说明
