@@ -17,7 +17,7 @@
 
 | # | khQuant 功能 | 大QMT 的情况 | 迁移时怎么处理 |
 |---|---|---|---|
-| A1 | 用 khQuant 自己下载的行情回测（BaoStock、Tushare、tx、同花顺等数据源导入的 DuckDB 库） | QMT 回测只读它自己「数据管理」下载的行情，不能指定外部数据库当行情源 | 在 QMT 里补下载同周期行情。两边行情源和复权算法不同，回测结果会有差异，必须先告诉用户 |
+| A1 | 用 khQuant 自己下载的行情回测（BaoStock、Tushare、tdx、同花顺等数据源导入的 DuckDB 库） | QMT 回测只读它自己「数据管理」下载的行情，不能指定外部数据库当行情源 | 在 QMT 里补下载同周期行情。两边行情源和复权算法不同，回测结果会有差异，必须先告诉用户 |
 | A2 | DuckDB 里的自定义指标列：`khDuckWrite` 写库、`khAddExtraFields` 注册、`khIndex` 读取；策略里用 `khDuckDB` 读库 | QMT 读不到 khQuant 的 DuckDB | 在策略里现算指标；或在 khQuant 这边把指标导出成 CSV，在 `kh_init` 里用 `open()` 读进全局字典（路径写死，注意编码）。迅投投研版另有「扩展数据」接口，券商版不一定有，不作为默认方案 |
 | A3 | `khDuckDB` 日线里的 BaoStock 字段：`peTTM`、`pbMRQ`、`psTTM`、`pcfNcfTTM`、`turn`、`pctChg`、`isST` | QMT 没有同名字段 | 换成 QMT 的 `get_financial_data`、`get_turnover_rate`、`get_st_status` 等，先补下载财务数据。口径、单位、历史可得性都不同，换算后要抽样核对 |
 | A4 | 命令行回测 `kh run`、网页工作台 `kh web`、批量参数研究、让 AI 自动跑回测循环 | QMT 回测只能在策略编辑器里点「回测」，没有命令行入口 | 参数遍历用策略编辑器「参数设置」的最小/最大/步长；大批量研究留在 khQuant 做，选定参数后再迁移 |

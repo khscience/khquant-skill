@@ -1,6 +1,6 @@
 ---
 name: khquant
-description: 当用户提到"回测"、"看海量化"、"kh命令"、"kh web"、"网页回测"、"跑策略"、"下载股票数据"、"查看回测结果"、"双均线"、"MACD"、"RSI策略"、"KDJ"、"布林带"、"miniQMT"、"BaoStock"、"Tushare"、"tx数据源"、"同花顺"、"扶摇"、"沪深300"、"A股"、".kh配置文件"、"策略开发"、"K线"、"DuckDB"、"量化交易"、"khHandlebar"、"khGet"、"khPrice"、"khIndex"、"khHistory"、"khDuckDB"、"khMA"、"generate_signal"、"khAddExtraFields"、"MyTT"、"技术指标"、"交易信号"时使用。本 skill 是看海量化回测平台 CLI (kh) 的自然语言入口，支持首次配置、数据管理、策略开发、桌面与网页回测、结果分析和故障排查。
+description: 当用户提到"回测"、"看海量化"、"kh命令"、"kh web"、"网页回测"、"跑策略"、"下载股票数据"、"查看回测结果"、"双均线"、"MACD"、"RSI策略"、"KDJ"、"布林带"、"miniQMT"、"BaoStock"、"Tushare"、"tdx数据源"、"通达信"、"同花顺"、"扶摇"、"沪深300"、"A股"、".kh配置文件"、"策略开发"、"K线"、"DuckDB"、"量化交易"、"khHandlebar"、"khGet"、"khPrice"、"khIndex"、"khHistory"、"khDuckDB"、"khMA"、"generate_signal"、"khAddExtraFields"、"MyTT"、"技术指标"、"交易信号"时使用。本 skill 是看海量化回测平台 CLI (kh) 的自然语言入口，支持首次配置、数据管理、策略开发、桌面与网页回测、结果分析和故障排查。
 ---
 
 # 看海量化回测平台 CLI 助手
@@ -40,7 +40,7 @@ Tushare Token、同花顺 API Key 等凭据不由 skill 直接处理。需要配
 | 用户意图关键词 | 阶段 | 参考文档 |
 |--------------|------|---------|
 | "第一次用"、"怎么开始"、"初始化"、"配置" | 首次配置 | `references/setup.md` |
-| "下载数据"、"股票池"、"数据源"、"同步"、"数据缺口"、"http数据源"、"桥接同步"、"tx数据"、"腾讯行情"、"同花顺"、"扶摇" | 数据管理 | `references/data-management.md` |
+| "下载数据"、"股票池"、"数据源"、"同步"、"数据缺口"、"http数据源"、"桥接同步"、"tdx数据"、"通达信"、"同花顺"、"扶摇" | 数据管理 | `references/data-management.md` |
 | "写策略"、"创建策略"、"回调函数"、"khHandlebar"、"khGet"、"khPrice"、"khIndex"、"khHistory"、"khDuckDB"、"khMA"、"generate_signal"、"khAddExtraFields"、"MyTT"、"技术指标"、"MACD"、"RSI"、"KDJ"、"布林带"、".kh配置" | 策略开发 | `references/strategy-development.md` |
 | "跑回测"、"运行策略"、".kh文件"、"回测参数"、"性能设置"、"性能模式"、"内存模式"、"省内存"、"全量加载"、"balanced"、"low_memory"、"performance_preset"、"memory-profile" | 回测执行 | `references/backtesting.md` |
 | "回测结果"、"收益率"、"报告"、"对比"、"绩效" | 结果分析 | `references/results-analysis.md` |
@@ -58,7 +58,7 @@ Tushare Token、同花顺 API Key 等凭据不由 skill 直接处理。需要配
 ## Phase 2 — 前置检查
 
 首次交互时运行 `kh version`，检查版本号：
-- 如果版本为 **v3.x**（当前正式版为 v3.4.1），正常继续；涉及功能边界时以实际输出和当前源码为准
+- 如果版本为 **v3.x**（当前正式版为 v3.4.1.12），正常继续；涉及功能边界时以实际输出和当前源码为准
 - 如果版本为 **v2.x**，**停止执行**并提示用户：
   > 检测到你使用的是看海量化 v2 版本，本 skill 仅支持 v3。请前往官网升级：https://khsci.com/khQuant/
 - 如果 `kh` 命令不存在，提示用户先安装：
@@ -151,13 +151,16 @@ pip install numpy pandas duckdb matplotlib Pillow holidays requests psutil
 - 回测不能再把文件占用静默当成“无数据”。桌面端会询问，CLI/网页等无阻塞回调场景默认跳过并明确告警；跳过清单写入回测目录 `duckdb_lock_skips.csv`，数量同步写入 `summary.csv`，CLI、网页结果卡和 HTML 报告都会提示。
 - 如果提示“数据已写入，但元数据刷新失败”，不要说数据丢了。正确处理是提示用户稍后执行扫描/修复元数据，例如 `kh data scan --fix --source <源>`，或在 GUI 数据库管理里扫描修复。
 
-### tx 与同花顺数据源（v3.4.1+）
+### tdx（通达信）与同花顺数据源
 
-- 界面和 CLI 中的“腾讯”数据源统一称为 **tx**。`--source tx` 与 `--source tencent` 等价，免费、无需账号，支持 `1d`/`1m`/`5m` 和 `none`/`front`/`back`/`front_ratio`/`back_ratio` 五种复权。数据来自 tx 财经 / 新浪财经公开网页接口，仅供个人学习研究；联网取数前 CLI 和 GUI 都会显示这句来源声明。
-- tx 分钟线只能取到最近一段历史：1 分钟约近 1 个月，5 分钟约近半年。分钟线的前/后复权按日线拟合，等比复权使用新浪复权因子。
+- **v3.4.1.12 起 tx（腾讯）数据源已下线**：GUI 和 CLI 都不再提供，`--source tx` 会提示改用其他数据源。库里已有的 tx 数据不受影响；`--repair-volume-units` 等旧库单位核验仍保留。用户要免费、无需账号的日线，推荐 BaoStock。
+- **tdx（通达信，v3.4.1.12+）** 用 `--source tdx`（同 `tqcenter`），只支持 **Windows 64 位**，要求本机安装并登录支持 TQ 策略的通达信新版客户端（安装目录有 `PYPlugins/user/tqcenter.py` 和 `TPythClient.dll`，SDK 1.1.0～2.0 之前），不需要 API Key。客户端目录在 设置 → 数据设置 → tdx客户端目录，或用 `--tdx-path`。
+- tdx 能下：沪深 A 股（60/68/00/30）、沪市 5 开头和深市 15 开头 ETF、`000300.SH` 日线（基准）；周期 `1d`/`1m`/`5m`；复权 `none`/`front`/`back`。不支持：北交所、可转债、LOF/场内基金、其他指数、Tick、等比复权。
+- tdx 日线可取长历史；**分钟线只读客户端“系统 → 盘后数据下载”下到本地的数据**，没下载的日期返回空（记为空返回，不是失败），提醒用户先在通达信里下载 1/5 分钟线。CLI 不写 `--start` 时 tdx 只取最近 30 天；16:00 前不含当天。
+- tdx 数据仅限本人使用，不得转售或再分发（通达信用户服务协议）。
 - **同花顺（扶摇开放平台）** 用 `--source ths`，需要用户在扶摇平台免费申请 API Key，目前支持 A 股日线和 `none`/`front`/`back` 复权。未配置 Key 时下载会直接报错并提示 `kh config set ths_api_key <API_KEY>`。
-- 两个数据源都支持 `--data-root <目录>` 下载到独立 DuckDB 目录，不改全局配置；也都会默认补充 `000300.SH` 基准日线。
-- 连通性检查：`kh data source test --source tx`、`kh data source test --source ths`。
+- `--data-root <目录>` 目前支持 ths、tdx、tushare、qmt_native（BaoStock 不支持）；ths 和 tdx 默认补充 `000300.SH` 基准日线。
+- 连通性检查：`kh data source test --source tdx`、`kh data source test --source ths`。
 - 股票列表更新优先使用同花顺接口（A 股、主要指数成分股、场内 ETF/LOF）；未配置同花顺 Key 时退回 BaoStock。
 - DuckDB K 线的 `volume` 统一以“手”存储，所有数据源都在写库前换算。不要建议用户整表乘除 100 “修正”成交量。
 

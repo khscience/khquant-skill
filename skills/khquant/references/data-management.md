@@ -2,18 +2,20 @@
 
 ## 数据源能力矩阵
 
-| 特性 | xtdata (miniQMT) | BaoStock | Tushare | tx | 同花顺 ths | http (bridge) |
-|------|-------------------|----------|---------|----|-----------|---------------|
-| 费用 | 券商开户免费 | 完全免费 | 积分制 | 免费，无需账号 | 免费申请 API Key | 取决于桥接端 |
+| 特性 | xtdata (miniQMT) | BaoStock | Tushare | tdx（通达信） | 同花顺 ths | http (bridge) |
+|------|-------------------|----------|---------|---------------|-----------|---------------|
+| 费用 | 券商开户免费 | 完全免费 | 积分制 | 本机通达信已登录，无需 Key | 免费申请 API Key | 取决于桥接端 |
 | 日线 1d | OK | OK | OK | OK | OK | OK |
-| 1 分钟线 1m | OK | - | OK | 约近 1 个月 | - | OK |
-| 5 分钟线 5m | OK | OK | OK | 约近半年 | - | OK |
+| 1 分钟线 1m | OK | - | OK | 盘后数据下载到本地的部分 | - | OK |
+| 5 分钟线 5m | OK | OK | OK | 盘后数据下载到本地的部分 | - | OK |
 | Tick 数据 | OK | - | - | - | - | 取决于桥接端 |
 | 前复权 front | OK | OK | OK | OK | OK | 取决于桥接端 |
 | 后复权 back | OK | OK | OK | OK | OK | 取决于桥接端 |
-| 前比例复权 front_ratio | OK | - | - | OK | - | 取决于桥接端 |
-| 后比例复权 back_ratio | OK | - | - | OK | - | 取决于桥接端 |
-| 安装要求 | QMT 客户端运行 | `pip install baostock` | Token + `pip install tushare` | 无 | `kh config set ths_api_key <API_KEY>` | 先运行 `kh bridge serve` 或配置远端桥接服务 |
+| 前比例复权 front_ratio | OK | - | - | - | - | 取决于桥接端 |
+| 后比例复权 back_ratio | OK | - | - | - | - | 取决于桥接端 |
+| 安装要求 | QMT 客户端运行 | `pip install baostock` | Token + `pip install tushare` | 仅 Windows 64 位，支持 TQ 策略的通达信客户端 | `kh config set ths_api_key <API_KEY>` | 先运行 `kh bridge serve` 或配置远端桥接服务 |
+
+tdx 品种范围：沪深 A 股、沪深 ETF（不含 LOF）、`000300.SH` 日线；不支持北交所、可转债、其他指数。tx（腾讯）数据源已在 v3.4.1.12 下线，库里已有数据不受影响。
 
 所有数据源写入 DuckDB 时，K 线 `volume` 统一以“手”存储，`amount` 以元存储。
 
@@ -48,7 +50,7 @@ kh data download --source baostock --file stocks.csv
 
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
-| `--source` | 无（必需）| `xtdata` / `baostock` / `tushare` / `tx`（同 `tencent`）/ `ths` / `http` |
+| `--source` | 无（必需）| `xtdata` / `baostock` / `tushare` / `tdx`（同 `tqcenter`）/ `ths` / `http` |
 | `--stocks` | | 股票代码，逗号分隔 |
 | `--pool` | | 预设池名称（见 pools-and-codes.md）|
 | `--file` | | 股票列表文件路径 |
@@ -80,28 +82,30 @@ kh bridge status
 kh data download --source http --stocks 000001.SZ --period 1d
 ```
 
-### tx 与同花顺
+### tdx（通达信）与同花顺
 
 ```bash
-# tx：免费，日线/1 分钟/5 分钟，五种复权
-kh data download --source tx --stocks 000001.SZ --period 1d,5m --adj none,front
+# tdx：本机通达信客户端（仅 Windows），日线/1 分钟/5 分钟，none/front/back
+# 不写 --start 时只取最近 30 天
+kh data download --source tdx --stocks 000001.SZ,510300.SH --period 1d --start 20160101 --adj front,back
+kh data download --source tdx --stocks 000001.SZ --period 1m,5m --adj front
 
 # 同花顺（扶摇）：先配置 API Key，目前只支持日线
 kh config set ths_api_key <API_KEY>
 kh data download --source ths --pool hs300 --period 1d --adj none,front,back
 
 # 下载到独立目录，不改全局配置
-kh data download --source tx --stocks 600000.SH --data-root ./tx_data
+kh data download --source tdx --stocks 600000.SH --data-root ./tdx_data
 
 # 连通性检查
-kh data source test --source tx
+kh data source test --source tdx
 kh data source test --source ths
 ```
 
-- tx 数据来自 tx 财经 / 新浪财经公开网页接口，仅供个人学习研究，联网前会显示来源声明。分钟线历史有限，超出可用窗口的日期没有数据，这不是下载失败。
-- tx 分钟线的前/后复权按日线拟合，等比复权使用新浪复权因子。
+- tdx 需要先打开并登录通达信客户端；分钟线只读客户端“系统 → 盘后数据下载”下到本地的数据，没下载的日期返回空，这不是下载失败，提示用户先在通达信里下载 1/5 分钟线。
+- tdx 分钟线的前/后复权按日线全历史复权因子换算，和日线对得上。数据仅限本人使用。
 - 同花顺 Key 也可以用环境变量 `HITHINK_FINANCE_API_KEY` 提供。Key 无效或未配置时命令直接报错，不会退回其他数据源。
-- GUI 数据管理顶栏有“tx数据导入”和“同花顺数据导入”两个入口，Key 在导入窗口或 设置 → 数据设置 中配置。
+- GUI 数据管理顶栏有“tdx数据导入”和“同花顺数据导入”两个入口；通达信客户端目录、同花顺 Key 都在 设置 → 数据设置 中配置。
 
 ### 数据管理中的 Tushare 补充
 
