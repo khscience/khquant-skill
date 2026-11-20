@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Version](https://img.shields.io/badge/version-1.4.3-blue.svg)](#版本)
-[![KhQuant](https://img.shields.io/badge/KhQuant-v3.4.1.15-green.svg)](https://khsci.com/khQuant/)
+[![KhQuant](https://img.shields.io/badge/KhQuant-v3.4.1.16-green.svg)](https://khsci.com/khQuant/)
 
 ---
 
@@ -39,7 +39,7 @@
 
 - **当前 Skill 版本**：v1.4.3
 - **`khquant-to-qmt`**：依据 KhQuant V3.4.1.11 源码和迅投内置 Python 手册（线上文件时间 2026-07-27）编写，2026-11-01 在券商版大QMT 实际回测验证；离线自检需要本机装有 KhQuant 和对应的本地数据
-- **主要匹配软件版本**：KhQuant v3.4.1.15
+- **主要匹配软件版本**：KhQuant v3.4.1.16
 - **基础兼容范围**：KhQuant v3.x
 - **需要 v3.4.1.13 的能力**：tdx（通达信）数据源（`--source tdx`，仅 Windows，需本机通达信客户端）、`kh data repair-front`。v3.4.1.13 起 tx（腾讯）数据源已下线，更早版本仍可使用 `--source tx`。
 - **需要 v3.4.1.7 的行为**：`khHistory` / `khMA` 不指定 `fq` 时跟随回测的复权方式（更早版本固定前复权），回测中不传时间参数时以当前 K 线为截止。
