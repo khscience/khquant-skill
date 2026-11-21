@@ -154,7 +154,7 @@ kh data update-pool
 kh data sync [--period 1d] [--source x] [--schedule HH:MM]
 ```
 
-数据源选项：`xtdata`（miniQMT 本地）、`baostock`（免费）、`tushare`（需 Token）、`tdx`（通达信本机客户端，仅 Windows，同 `tqcenter`）、`ths`（同花顺扶摇，需 API Key）、`http`（经桥接服务）。`--data-root` 目前支持 `ths`、`tdx`、`tushare`、`qmt_native`。tx（腾讯）数据源已在 v3.4.1.13 下线。
+数据源选项：`xtdata`（miniQMT 本地）、`baostock`（免费）、`tushare`（需 Token）、`tdx`（通达信本机客户端，仅 Windows，同 `tqcenter`，v3.4.1.16 起默认 `--workers 4`，支持 1～8）、`ths`（同花顺扶摇，需 API Key）、`http`（经桥接服务）。`--data-root` 目前支持 `ths`、`tdx`、`tushare`、`qmt_native`。tx（腾讯）数据源已在 v3.4.1.13 下线。v3.4.1.16 起，带 UTF-8 BOM 的 `.kh` 配置和策略文件在 `kh run`、`kh web`、`kh strategy` 中均可正常读取。
 
 `kh data download` 写库模式（v3.3.6.1+）：
 

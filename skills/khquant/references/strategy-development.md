@@ -233,6 +233,33 @@ khMA(stock_code: str, period: int, field: str = 'close',
 - `fq` 与 khHistory 相同：默认跟随回测的复权方式，独立调用时为前复权。
 - 回测中不传 `end_time` 时自动以当前 K 线时间为截止（V3.4.1.7 起）；1m/5m/tick 周期在回测中不再检查电脑当前是否交易时段，夜间也能回测。实时运行时（不在回测中且未传 `end_time`）仍要求处于交易时段。
 
+### khTdxFormula — 调用通达信公式（V3.4.1.16 起）
+
+```
+khTdxFormula(data, stock_code, formula, args='', *, line=None, period=None,
+             dividend_type=None, include_current=False, client_path=None) -> dict | float
+khTdxFormulaClearCache() -> None
+```
+
+直接调用通达信「公式管理器」里的**技术指标公式**（系统公式或自己写的），返回 `{输出线: 数值}`，指定 `line` 时返回单个数值（上市前或预热期之前为 `None`）：
+
+```python
+v = khTdxFormula(data, '000001.SZ', 'MACD', '12,26,9')        # {'DIF': .., 'DEA': .., 'MACD': ..}
+j = khTdxFormula(data, '000001.SZ', 'KDJ', '9,3,3', line='J')
+my = khTdxFormula(data, '000001.SZ', 'MYIND', '10,20')        # 调用自编技术指标公式
+```
+
+- **公式类型与输出线**：仅支持通达信里的**技术指标公式**（条件选股公式、交易系统公式不能直接调用）；公式内需要有带名称的输出线（如 `DIF:...;`），返回值字典的键即输出线名称。
+- **适用标的**：仅支持沪深 A 股和 ETF，北交所、可转债、指数暂不支持。
+- **缓存与性能**：每只证券、每个公式第一次调用时一次取回整段指标并写入内存缓存（同一股票池顺带批量预取，每批最多 50 只，超出自动分批），之后每根 K 线直接查表，平均约 2 毫秒一次。同一软件进程里如果中途修改了通达信自定义公式或补完最新盘后数据，调用 `khTdxFormulaClearCache()`（或重启软件）清空缓存再取。
+- **防未来数据**：默认只返回当前 K 线之前已完成的值（与 khMA/khHistory 一致）：日线是前一交易日的值，分钟线是上一根的值；确实需要当前这根收盘后的值时传 `include_current=True`。
+- **周期与复权**：`period`（`1d`/`1m`/`5m`）、`dividend_type`（`none`/`front`/`back`）默认跟随回测设置；不支持 tick 和等比复权。
+- **精度与历史范围**：数值保留 4 位小数。日线从上市起算；分钟线只能算到通达信「盘后数据下载」已下的分钟数据为止（1 分钟约 100 天、5 分钟约 700 天）。
+- **运行条件**：仅 Windows；通达信客户端已开启并用账号登录；「软件设置 → 数据设置」里填好 `tdx_client_path`（界面称「tdx 客户端目录」，也可通过参数 `client_path` 传入）。macOS/Linux 不可用。
+- **数据一致性**：指标由通达信客户端里的 K 线与复权算出；与本地回测库数据不一致时（例如客户端分钟线未更新）结果会对不上，建议本地行情也用 tdx 导入保持同源。
+- **参考示例**：`strategies/【6-通达信公式】MACD金叉KDJ确认_使用khTdxFormula.py`。
+- 实测（2025 全年日线、2026-10/11 的 5 分钟线）：与 MyTT 按本地同源前复权数据算的 MACD 逐根一致，差异只来自 MyTT 保留 3 位小数。
+
 ---
 
 ## 高性能指标模式（推荐）

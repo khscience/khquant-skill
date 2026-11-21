@@ -59,7 +59,7 @@ kh data download --source baostock --file stocks.csv
 | `--end` | 至今 | 结束日期 YYYYMMDD |
 | `--adj` | `front` | 复权：`none`/`front`/`back`/`front_ratio`/`back_ratio` |
 | `--force` | 否 | 强制覆写已有数据 |
-| `--workers` | `2` | 并行进程数 |
+| `--workers` | `2`（tdx 默认 `4`） | 并行进程数（v3.4.1.16 起 tdx 支持 1～8，默认 4） |
 | `--db-write-mode` | `auto` | DuckDB 写库模式：`auto`/`normal`/`short-lock` |
 
 ### 典型场景
@@ -86,9 +86,9 @@ kh data download --source http --stocks 000001.SZ --period 1d
 
 ```bash
 # tdx：本机通达信客户端（仅 Windows），日线/1 分钟/5 分钟，none/front/back
-# 不写 --start 时只取最近 30 天
+# 不写 --start 时只取最近 30 天；v3.4.1.16 起默认 4 个并发进程（--workers 1~8）
 kh data download --source tdx --stocks 000001.SZ,510300.SH --period 1d --start 20160101 --adj front,back
-kh data download --source tdx --stocks 000001.SZ --period 1m,5m --adj front
+kh data download --source tdx --stocks 000001.SZ --period 1m,5m --adj front --workers 4
 
 # 同花顺（扶摇）：先配置 API Key，目前只支持日线
 kh config set ths_api_key <API_KEY>
@@ -103,15 +103,16 @@ kh data source test --source ths
 ```
 
 - tdx 需要先打开并登录通达信客户端；分钟线只读客户端“选项 → 盘后数据下载”（老版本在“系统”菜单）下到本地的数据（1 分钟线只能下最近 100 天、5 分钟线最近 700 天，以前下过的会留在本地），没下载的日期返回空，这不是下载失败，提示用户先在通达信里下载 1/5 分钟线。
+- tdx 并发导入（v3.4.1.16 起）：GUI 导入窗口提供「并发进程」（1～8，默认 4，自动记忆），CLI `--workers` 默认也是 4。同一只股票只由一个进程处理，不会并发写同一个 `.db`；客户端卡顿或断开时可调小，设成 1 即退回逐只串行（实测 8 进程日线反而慢于 4 进程）。
 - tdx 分钟线的前/后复权按日线全历史复权因子换算，和日线对得上。数据仅限本人使用。
 - 同花顺 Key 也可以用环境变量 `HITHINK_FINANCE_API_KEY` 提供。Key 无效或未配置时命令直接报错，不会退回其他数据源。
 - GUI 数据管理顶栏有“tdx数据导入”和“同花顺数据导入”两个入口；通达信客户端目录、同花顺 Key 都在 设置 → 数据设置 中配置。
 
 ### 数据管理中的 Tushare 补充
 
-- GUI 的“从 Tushare 导入数据”支持日线、1 分钟和 5 分钟行情。原始价是 DuckDB 基础字段并始终保存，可选同时生成前复权、后复权列。
-- 增量模式只检查用户选定的日期范围，不会再自动扩展到数据库全部历史区间。
-- 分钟线按每日记录数检查完整性：完整 1 分钟日为 241 根，完整 5 分钟日为 48 根；当天只有部分记录时会重新补充。
+- GUI 的“从 Tushare 导入数据”与 `kh data download/sync --source tushare` 默认按交易日缺口增量写入软件设置里的全局 DuckDB 回测目录（仅在显式配置 `tushare_data_path`、`KH_TUSHARE_DATA_ROOT` 或 `--data-root` 时写独立目录）。原始价始终保存，可选同时生成前复权、后复权列。
+- 增量模式只检查用户选定的日期范围，不会再自动扩展到数据库全部历史区间；v3.4.1.16 起按随包上市日期表自动跳过上市前日期，接口正常返回空的停牌日按“无行情”处理不再记“待核验”或报部分失败，没有新行情写入时不再整段重算复权。
+- 分钟线按每日记录数检查完整性：完整 1 分钟日为 241 根，完整 5 分钟日为 48 根（Tushare 含 09:30 共 49 根同样视为完整日）；当天只有部分记录时会重新补充。
 - 网络、权限、限流和服务端错误与“正常无行情”分开处理，不会再把接口失败显示成“成功写入 0 条”。
 - Tushare GUI 默认使用短锁写入：每只股票写完立即释放 `.db`，任务收尾再批量更新 `metadata.db`。
 - 文件占用自动重试 5 次后，界面提供“继续重试 / 先跳过 / 停止任务”；结束日志和弹窗会列出占用跳过项。重试写库不会重复请求 Tushare 行情。

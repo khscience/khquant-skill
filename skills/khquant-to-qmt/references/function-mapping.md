@@ -62,6 +62,7 @@ df = df[[str(i).replace('-', '')[:8] < bar_time[:8] for i in df.index]].tail(N)
 | MyTT 指标（`MA`、`EMA`、`MACD`、`KDJ`、`RSI`、`BOLL` 等） | 从 khQuant 的 `MyTT.py` 复制用到的函数进策略文件（纯 numpy/pandas）；或改用内置 `talib`（参数和口径要核对，例如 MyTT 的 `SMA` 是中国式 SMA，和 talib 的 SMA 不同） |
 | `khKline(code, '15m', n)` | `get_market_data_ex(..., period='15m')`，需要已下载 5m；最后一根是否收线自己判断 |
 | 缠论工具 `is_bottom_fractal` 等 | 从 `khChanLunTools.py` 复制用到的函数 |
+| `khTdxFormula(data, code, formula, ...)` | 大QMT 无法直接调用通达信公式（见 not-supported.md A15）；改用 MyTT/Python 现算，或在 khQuant 预计算导出 CSV 后在 `kh_init` 加载 |
 | `get_market_data_ex(subscribe=True)` | 回测里不要用；订阅模式有数量上限（单次不超过 500 只），回测一律 `subscribe=False` |
 
 `fill_data` 默认 True 会给停牌日补数据；khQuant 本地库停牌日一般没有新数据，迁移时建议 `fill_data=False`，并用 `dropna` 去掉空行。

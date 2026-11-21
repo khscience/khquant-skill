@@ -3,7 +3,7 @@
 > 看海量化回测平台 (KhQuant) 的 AI Skill 插件 — 用自然语言完成数据管理、策略开发、桌面/CLI/Web 回测、结果分析和故障排查，并能把 khQuant 回测策略迁移到大QMT 内置 Python。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Version](https://img.shields.io/badge/version-1.4.3-blue.svg)](#版本)
+[![Version](https://img.shields.io/badge/version-1.4.4-blue.svg)](#版本)
 [![KhQuant](https://img.shields.io/badge/KhQuant-v3.4.1.16-green.svg)](https://khsci.com/khQuant/)
 
 ---
@@ -37,10 +37,11 @@
 
 ## 适配版本
 
-- **当前 Skill 版本**：v1.4.3
+- **当前 Skill 版本**：v1.4.4
 - **`khquant-to-qmt`**：依据 KhQuant V3.4.1.11 源码和迅投内置 Python 手册（线上文件时间 2026-07-27）编写，2026-11-01 在券商版大QMT 实际回测验证；离线自检需要本机装有 KhQuant 和对应的本地数据
 - **主要匹配软件版本**：KhQuant v3.4.1.16
 - **基础兼容范围**：KhQuant v3.x
+- **需要 v3.4.1.16 的能力**：策略里直接调用通达信公式 `khTdxFormula` / `khTdxFormulaClearCache`（仅 Windows，支持技术指标公式与沪深股票/ETF）、tdx 多进程并发导入（默认 4 进程，`--workers 1~8`）、Tushare 补数跳过上市前与停牌日不误报、带 UTF-8 BOM 的 `.kh` / 策略文件读取。
 - **需要 v3.4.1.13 的能力**：tdx（通达信）数据源（`--source tdx`，仅 Windows，需本机通达信客户端）、`kh data repair-front`。v3.4.1.13 起 tx（腾讯）数据源已下线，更早版本仍可使用 `--source tx`。
 - **需要 v3.4.1.7 的行为**：`khHistory` / `khMA` 不指定 `fq` 时跟随回测的复权方式（更早版本固定前复权），回测中不传时间参数时以当前 K 线为截止。
 - **需要 v3.4.1 的能力**：同花顺扶摇数据源（`--source ths`）、`ths_api_key` 配置与脱敏显示、DuckDB 成交量统一按“手”存储。
@@ -50,6 +51,12 @@
 低于 v3.4.0 时仍可使用基础配置、数据管理、策略开发和普通回测规则，但不要假设 Web 或新版数据管理能力存在；先运行 `kh version` 和对应命令的 `--help` 确认。
 
 ## 更新日志
+
+### v1.4.4 (2026-11-21)
+
+- 适配 KhQuant V3.4.1.16：补齐 `khTdxFormula` / `khTdxFormulaClearCache` 通达信公式调用用法、触发词、缓存刷新与适用边界（仅 Windows、技术指标公式、沪深 A 股和 ETF），新增对应故障排查说明。
+- 补齐 tdx 多进程并发导入（GUI「并发进程」与 CLI `--workers` 默认 4，支持 1～8）、Tushare 补数默认写回测目录及上市前/停牌日处理规则、带 UTF-8 BOM 的 `.kh` / 策略文件兼容说明。
+- `khquant-to-qmt` 清单与函数对照新增 `khTdxFormula` 条目（A15），并同步 2026-11-02 不复权对账实测结论（C10）。
 
 ### v1.4.3 (2026-11-18)
 
@@ -244,7 +251,7 @@ khquant-skill/
 │   └── references/
 │       ├── setup.md                首次配置
 │       ├── data-management.md      数据管理
-│       ├── strategy-development.md 策略开发（含 API、MyTT 指标库、.kh 配置）
+│       ├── strategy-development.md 策略开发（含 API、MyTT 指标库、khTdxFormula、.kh 配置）
 │       ├── backtesting.md          回测执行
 │       ├── web-backtesting.md      Web 工作台、远程访问与状态排错
 │       ├── results-analysis.md     结果分析
@@ -289,6 +296,7 @@ rmdir /S /Q "%USERPROFILE%\.claude\skills\khquant-to-qmt"
 
 ## 版本
 
+- **v1.4.4** — 适配 KhQuant V3.4.1.16：补齐 khTdxFormula 通达信公式调用、tdx 多进程并发、Tushare 补数修复、排错指南与 khquant-to-qmt 迁移说明
 - **v1.4.3** — tdx 盘后数据下载菜单路径更正，补 1/5 分钟线可下载天数
 - **v1.4.2** — 适配 KhQuant V3.4.1.13：去掉已下线的 tx 数据源，新增 tdx（通达信）数据源说明
 - **v1.4.1** — `khquant-to-qmt` 全面测试后修正涨跌停、挂单计数和持仓均价口径，补真实大QMT 实测结论

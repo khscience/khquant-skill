@@ -1,6 +1,6 @@
 ---
 name: khquant
-description: 当用户提到"回测"、"看海量化"、"kh命令"、"kh web"、"网页回测"、"跑策略"、"下载股票数据"、"查看回测结果"、"双均线"、"MACD"、"RSI策略"、"KDJ"、"布林带"、"miniQMT"、"BaoStock"、"Tushare"、"tdx数据源"、"通达信"、"同花顺"、"扶摇"、"沪深300"、"A股"、".kh配置文件"、"策略开发"、"K线"、"DuckDB"、"量化交易"、"khHandlebar"、"khGet"、"khPrice"、"khIndex"、"khHistory"、"khDuckDB"、"khMA"、"generate_signal"、"khAddExtraFields"、"MyTT"、"技术指标"、"交易信号"时使用。本 skill 是看海量化回测平台 CLI (kh) 的自然语言入口，支持首次配置、数据管理、策略开发、桌面与网页回测、结果分析和故障排查。
+description: 当用户提到"回测"、"看海量化"、"kh命令"、"kh web"、"网页回测"、"跑策略"、"下载股票数据"、"查看回测结果"、"双均线"、"MACD"、"RSI策略"、"KDJ"、"布林带"、"miniQMT"、"BaoStock"、"Tushare"、"tdx数据源"、"通达信"、"通达信公式"、"khTdxFormula"、"khTdxFormulaClearCache"、"同花顺"、"扶摇"、"沪深300"、"A股"、".kh配置文件"、"策略开发"、"K线"、"DuckDB"、"量化交易"、"khHandlebar"、"khGet"、"khPrice"、"khIndex"、"khHistory"、"khDuckDB"、"khMA"、"generate_signal"、"khAddExtraFields"、"MyTT"、"技术指标"、"交易信号"时使用。本 skill 是看海量化回测平台 CLI (kh) 的自然语言入口，支持首次配置、数据管理、策略开发、桌面与网页回测、结果分析和故障排查。
 ---
 
 # 看海量化回测平台 CLI 助手
@@ -41,7 +41,7 @@ Tushare Token、同花顺 API Key 等凭据不由 skill 直接处理。需要配
 |--------------|------|---------|
 | "第一次用"、"怎么开始"、"初始化"、"配置" | 首次配置 | `references/setup.md` |
 | "下载数据"、"股票池"、"数据源"、"同步"、"数据缺口"、"http数据源"、"桥接同步"、"tdx数据"、"通达信"、"同花顺"、"扶摇" | 数据管理 | `references/data-management.md` |
-| "写策略"、"创建策略"、"回调函数"、"khHandlebar"、"khGet"、"khPrice"、"khIndex"、"khHistory"、"khDuckDB"、"khMA"、"generate_signal"、"khAddExtraFields"、"MyTT"、"技术指标"、"MACD"、"RSI"、"KDJ"、"布林带"、".kh配置" | 策略开发 | `references/strategy-development.md` |
+| "写策略"、"创建策略"、"回调函数"、"khHandlebar"、"khGet"、"khPrice"、"khIndex"、"khHistory"、"khDuckDB"、"khMA"、"khTdxFormula"、"khTdxFormulaClearCache"、"通达信公式"、"generate_signal"、"khAddExtraFields"、"MyTT"、"技术指标"、"MACD"、"RSI"、"KDJ"、"布林带"、".kh配置" | 策略开发 | `references/strategy-development.md` |
 | "跑回测"、"运行策略"、".kh文件"、"回测参数"、"性能设置"、"性能模式"、"内存模式"、"省内存"、"全量加载"、"balanced"、"low_memory"、"performance_preset"、"memory-profile" | 回测执行 | `references/backtesting.md` |
 | "回测结果"、"收益率"、"报告"、"对比"、"绩效" | 结果分析 | `references/results-analysis.md` |
 | "kh web"、"网页回测"、"网页工作台"、"Web界面"、"实时日志"、"本次回测结果" | 网页回测 | `references/web-backtesting.md` |

@@ -195,3 +195,19 @@ ERR 同花顺 API Key 未配置或无效，请运行: python kh.py config set th
 2. 由用户自己执行 `kh config set ths_api_key <API_KEY>`，或设置环境变量 `HITHINK_FINANCE_API_KEY`。
 3. 用 `kh data source test --source ths` 确认连通。
 不要在回复里复述或记录用户的 Key。
+
+---
+
+### khTdxFormula 调用失败或没有返回结果（V3.4.1.16+）
+
+**常见报错**：
+- `khTdxFormula：未设置tdx客户端目录`
+- `khTdxFormula：<code> 公式 <name> 没有返回结果`
+- `khTdxFormula：<name> 没有输出线 <line>`
+
+**排查**：
+1. **平台与客户端**：仅支持 Windows；确认支持 TQ 的 64 位通达信客户端已开启并用账号登录（游客模式连不上）。
+2. **目录配置**：在「软件设置 → 数据设置」填写 `tdx_client_path`（或调用时传 `client_path`），并先用 `kh data source test --source tdx` 确认连通。
+3. **公式类型与输出线**：仅支持通达信公式管理器里的**技术指标公式**（条件选股、交易系统公式不能直接调用）；输出线名需与公式里冒号前的变量名一致。
+4. **标的与分钟数据**：仅支持沪深 A 股和 ETF（不含北交所、可转债、指数）；跑 1m/5m 指标前须先在通达信「选项 → 盘后数据下载」下载本地分钟线。
+5. **缓存刷新**：同一进程里修改了自定义公式或刚补完盘后数据，调用 `khTdxFormulaClearCache()`（或重启软件）清缓存后重试。
